@@ -1,8 +1,11 @@
-# [START functions_slack_setup]
+import json
 import os
 
 import requests
-from flask import Flask, make_response, request
+
+file = open("config.json")
+secret = json.load(file)
+oauth_token = secret.get("OAUTH_TOKEN")
 
 
 def respond(request):
@@ -39,9 +42,9 @@ def event_handler(event):
         if "subtype" in event:
             event_subtype = event.get("subtype")
             if event_subtype == "message_deleted":
-                return no_event_handler(event_type)
+                return no_event_handler(event_subtype)
             elif event_subtype == "message_changed":
-                return no_event_handler(event_type)
+                return no_event_handler(event_subtype)
             elif event_subtype == "thread_broadcast":
                 return send_message(channel, text)
         return send_message(channel, text)
