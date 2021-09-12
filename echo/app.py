@@ -1,14 +1,15 @@
-import json
-import os
-
 import flask
+import requests
+import yaml
+from flask import make_response
 
 import main
 
 app = flask.Flask(__name__)
-file = open("config.json")
-secret = json.load(file)
-oauth_token = secret.get("OAUTH_TOKEN")
+file = open("../.env.yaml")
+secret = yaml.safe_load(file)
+file.close()
+oauth_token = secret.get("SLACK_BOT_TOKEN")
 
 
 @app.route("/echo", methods=["GET", "POST"])
