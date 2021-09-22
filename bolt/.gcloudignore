@@ -12,7 +12,7 @@
 # below:
 .git
 .gitignore
-.env.yaml.sample
+.env.yaml
 
 node_modules
 #!include:.gitignore
