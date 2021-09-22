@@ -1,24 +1,36 @@
 # https://cloud.google.com/functions/docs/first-python
 
 import logging
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 
 from slack_bolt import App
 
 # process_before_response must be True when running on FaaS
-app = App(process_before_response=True)
+app = App(
+    process_before_response=True,
+    token=os.environ.get("SLACK_BOT_TOKEN"),
+    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+)
 
 
-@app.command("/hello-bolt-python-gcp")
-def hello_command(ack):
-    ack("Hi from Google Cloud Functions!")
-
-
-@app.event("app_mention")
-def event_test(body, say, logger):
+@app.command("/echo")
+def echo(body, logger, command, ack, say):
     logger.info(body)
-    say("Hi from Google Cloud Functions!")
+    text = command.get("text")
+    if text is None or len(text) == 0:
+        # Acknowledge command request
+        ack(f":x: 사용법 `/echo 텍스트`")
+    else:
+        ack()
+        say(f"{command['text']}")
+
+
+@app.event("message")
+def echo(body, logger, message, say):
+    logger.info(body)
+    say(f"{message['text']}")
 
 
 # Flask adapter
@@ -27,7 +39,7 @@ from slack_bolt.adapter.flask import SlackRequestHandler
 handler = SlackRequestHandler(app)
 
 # Cloud Function
-def hello_bolt_app(request):
+def echo_bot(request):
     """HTTP Cloud Function.
     Args:
         request (flask.Request): The request object.
@@ -37,12 +49,6 @@ def hello_bolt_app(request):
         Response object using `make_response`
         <https://flask.palletsprojects.com/en/1.1.x/api/#flask.make_response>.
     """
-    for key, value in request.items():
-        if key == "body":
-            print(f"[SLACK MESSAGE BODY]: {value}")
-            # Return challenge for authentication with slack
-            if "challenge" in value:
-                return value
     return handler.handle(request)
 
 
@@ -60,8 +66,3 @@ def hello_bolt_app(request):
 # Step4: Deploy a function in the project
 # gcloud functions deploy hello_bolt_app --runtime python38 --trigger-http --allow-unauthenticated --env-vars-file .env.yaml
 # gcloud functions describe hello_bolt_app
-
-# Step5: Set Request URL
-# Set https://us-central1-YOUR_PROJECT_NAME.cloudfunctions.net/hello_bolt_app to the following:
-#  * slash command: /hello-bolt-python-gcp
-#  * Events Subscriptions & add `app_mention` event
