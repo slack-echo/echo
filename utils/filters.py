@@ -1,126 +1,47 @@
-def getitem(object):
-    return list(object)[0]
+import yaml
+
+file = open("utils/params.yaml", "r")
+params = yaml.safe_load(file)
 
 
-from abc import ABC, abstractmethod
-
-
-class conversation_filter:
-    class parameters:
-        channel = {
-            "id",
-            "name",
-            "is_channel",
-            "created",
-            "creator",
-            "is_archived",
-            "is_general",
-            "name_normalized",
-            "is_shared",
-            "is_org_shared",
-            "is_member",
-            "is_private",
-            "is_mpim",
-            "last_read",
-            "latest",
-            "unread_count",
-            "unread_count_display",
-            "members",
-            "topic",
-            "purpose",
-            "previous_names",
-        }
-        group = {
-            "id",
-            "name",
-            "is_group",
-            "created",
-            "creator",
-            "is_archived",
-            "is_mpim",
-            "members",
-            "topic",
-            "purpose",
-            "last_read",
-            "latest",
-            "unread_count",
-            "unread_count_display",
-        }
-        mpim = {
-            "id",
-            "name",
-            "is_mpim",
-            "is_group",
-            "created",
-            "creator",
-            "members",
-            "last_read",
-            "latest",
-            "unread_count",
-            "unread_count_display",
-        }
-        im = {
-            "id",
-            "is_im",
-            "user",
-            "created",
-            "is_user_deleted",
-        }
-
-        def __new__(cls, supcls=None):
-            if supcls:
-                if "channel" in supcls.__name__:
-                    return cls.channel
-                elif "group" in supcls.__name__:
-                    return cls.group
-                elif "mpim" in supcls.__name__:
-                    return cls.mpim
-                elif "im" in supcls.__name__:
-                    return cls.im
-            parameters = [cls.channel, cls.group, cls.mpim, cls.im]
-            return set.union(*parameters)
-
-        def __init__(self):
-            self._channel = self.channel
-            self._group = self.group
-            self._mpim = self.mpim
-            self._im = self.im
-            self._conversation = set.union(self.channel, self.group, self.mpim, self.im)
-
-        def __call__(self, supcls=None):
-            if supcls:
-                if "channel" in supcls.__name__:
-                    return self._channel
-                elif "group" in supcls.__name__:
-                    return self._group
-                elif "mpim" in supcls.__name__:
-                    return self._mpim
-                elif "im" in supcls.__name__:
-                    return self._im
-            return self._conversation
-
+class ConversationFilter:
     def __new__(cls, *args, **kwargs):
-        parameters = cls.parameters.__new__(cls.parameters, cls.__class__)
+        parameters = set(
+            params.get(cls.__name__.upper(), set.union(*map(set, params.values())))
+        )
         assert set(kwargs).issubset(parameters), "Invalid Parameters"
         return super().__new__(cls)
 
     def __init__(self, conversations, **conditions):
         self.conditions = conditions
-        self.conversations = list(
-            filter(
-                lambda c: all(
-                    condition in c.items() for condition in conditions.items()
-                ),
-                conversations,
+        if conversations:
+            self.conversations = list(
+                filter(
+                    lambda c: all(
+                        condition in c.items() for condition in conditions.items()
+                    ),
+                    conversations,
+                )
             )
-        )
-        self._id = [conversation["id"] for conversation in self.conversations]
-        self._name = [
-            conversation["user"] if conversation.get("is_im") else conversation["name"]
-            for conversation in self.conversations
-        ]
-        self._created = [conversation["created"] for conversation in self.conversations]
-        self._parameter = self.parameters.__new__(self.parameters, self.__class__)
+            self._id = [conversation["id"] for conversation in self.conversations]
+            self._name = [
+                conversation["user"]
+                if conversation.get("is_im")
+                else conversation["name"]
+                for conversation in self.conversations
+            ]
+            self._created = [
+                conversation["created"] for conversation in self.conversations
+            ]
+            self._parameter = (
+                set.intersection(*self.parameters()) if self.parameters() else set()
+            )
+
+    def __del__(self):
+        del self
+
+    def parameters(self):
+        return [set(conversation.keys()) for conversation in self.conversations]
 
     @property
     def id(self):
@@ -150,8 +71,12 @@ class conversation_filter:
     def parameter(self):
         return self._parameter
 
+    @parameter.deleter
+    def parmeter(self):
+        del self._parameter
 
-class channel_filter(conversation_filter):
+
+class ChannelFilter(ConversationFilter):
     """public channel"""
 
     def __new__(cls, *args, **kwargs):
@@ -162,7 +87,7 @@ class channel_filter(conversation_filter):
         super().__init__(conversations, **conditions)
 
 
-class group_filter(conversation_filter):
+class GroupFilter(ConversationFilter):
     """private channel"""
 
     def __new__(cls, *args, **kwargs):
@@ -173,7 +98,7 @@ class group_filter(conversation_filter):
         super().__init__(conversations, **conditions)
 
 
-class mpim_filter(conversation_filter):
+class MpimFilter(ConversationFilter):
     """group direct message"""
 
     def __new__(cls, *args, **kwargs):
@@ -184,7 +109,7 @@ class mpim_filter(conversation_filter):
         super().__init__(conversations, **conditions)
 
 
-class im_filter(conversation_filter):
+class ImFilter(ConversationFilter):
     """direct message"""
 
     def __new__(cls, *args, **kwargs):

@@ -1,4 +1,4 @@
-from utils.filters import channel_filter
+from utils.filters import ChannelFilter
 
 
 def admin_mention(message, logger, client, say, respond):
@@ -6,7 +6,7 @@ def admin_mention(message, logger, client, say, respond):
     user_id = message.get("user")
     channel_id = message.get("channel")
     conversations = client.conversations_list()
-    channel = channel_filter(conversations, channel_id)
+    channel = ChannelFilter(conversations, channel_id)
     ts = message.get("ts")
     text = message.get("text")
     text = text.replace("@admin", "").strip()

@@ -42,40 +42,47 @@ conversations = [
         "num_members": 23,
         "locale": "en-US",
     },
+    {
+        "id": "C012AB3CD",
+        "name": "general",
+        "testtest": True,
+        "last_read": "1502126650.228446",
+        "topic": {
+            "value": "For public discussion of generalities",
+            "creator": "W012A3BCD",
+            "last_set": 1449709364,
+        },
+        "created": 1449252889,
+    },
 ]
 
 
 def test_conversation_filter(conversations, **conditions):
-    conversation = conversation_filter(conversations, **conditions)
-    print(len(conversation.parameter))
+    conversation = ConversationFilter(conversations, **conditions)
     print(conversation.id)
     print(conversation.name)
 
 
 def test_channel_filter(conversations, **conditions):
-    channel = channel_filter(conversations, **conditions)
-    print(len(channel.parameter))
+    channel = ChannelFilter(conversations, **conditions)
     print(channel.id)
     print(channel.name)
 
 
 def test_group_filter(conversations, **conditions):
-    group = group_filter(conversations, **conditions)
-    print(len(group.parameter))
+    group = GroupFilter(conversations, **conditions)
     print(group.id)
     print(group.name)
 
 
 def test_mpim_filter(conversations, **conditions):
-    mpim = mpim_filter(conversations, **conditions)
-    print(len(mpim.parameter))
+    mpim = MpimFilter(conversations, **conditions)
     print(mpim.id)
     print(mpim.name)
 
 
 def test_im_filter(conversations, **conditions):
-    im = im_filter(conversations, **conditions)
-    print(len(im.parameter))
+    im = ImFilter(conversations, **conditions)
     print(im.id)
     print(im.name)
 

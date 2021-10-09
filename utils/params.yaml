@@ -1,0 +1,55 @@
+CHANNELFILTER:
+    - id
+    - name
+    - is_channel
+    - created
+    - creator
+    - is_archived
+    - is_general
+    - name_normalized
+    - is_shared
+    - is_org_shared
+    - is_member
+    - is_private
+    - is_mpim
+    - last_read
+    - latest
+    - unread_count
+    - unread_count_display
+    - members
+    - topic
+    - purpose
+    - previous_name
+GROUPFILTER:
+    - id
+    - name
+    - is_group
+    - created
+    - creator
+    - is_archived
+    - is_mpim
+    - members
+    - topic
+    - purpose
+    - last_read
+    - latest
+    - unread_count
+    - unread_count_display
+MPIMFILTER:
+    - id
+    - name
+    - is_mpim
+    - is_group
+    - created
+    - creator
+    - members
+    - last_read
+    - latest
+    - unread_count
+    - unread_count_display
+IMFILTER:
+    - id
+    - is_im
+    - user
+    - created
+    - is_user_deleted
