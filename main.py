@@ -1,13 +1,12 @@
-# https://cloud.google.com/functions/docs/first-python
-
 import logging
 import os
 
-logging.basicConfig(level=logging.DEBUG)
-
 from slack_bolt import App
+from slack_bolt.adapter.flask import SlackRequestHandler
 
 import listeners
+
+logging.basicConfig(level=logging.DEBUG)
 
 # process_before_response must be True when running on FaaS
 app = App(
@@ -19,8 +18,6 @@ app = App(
 listeners.listen(app)
 
 # Flask adapter
-from slack_bolt.adapter.flask import SlackRequestHandler
-
 handler = SlackRequestHandler(app)
 
 # Cloud Function
