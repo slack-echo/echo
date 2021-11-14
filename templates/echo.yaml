@@ -1,0 +1,28 @@
+text:
+  help: |-
+    :x: 실행되지 않았습니다.
+
+    :information_source: 사용법
+    `/echo 메시지 [@admin|@운영위원회|...]` : 현재 채널에서 에코 메시지 [@채널 멘션 알림]
+  pretext: |-
+    이 채널이 <#{channel_id}>에서 멘션되었습니다.
+blocks: >-
+  [
+    {{
+        "type": "section",
+        "text": {{"type": "mrkdwn", "text": "{0}"}}
+    }}
+  ]
+attachments: >-
+  [
+    {{
+        "color": "#d0d0d0",
+        "blocks":
+          [
+            {{
+                "type": "section",
+                "text": {{"type": "mrkdwn", "text": "{0}"}}
+            }}
+          ]
+    }}
+  ]
