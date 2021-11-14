@@ -1,4 +1,6 @@
 .env.yaml
+credentials.json
+token.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
