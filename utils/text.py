@@ -24,3 +24,14 @@ def parse_random_command(text):
             )
     else:
         return 1, [], []
+
+
+def text_replace(text, replace_dict={}):
+    default_dict = {"&lt;": "<", "|&gt;": ">"}
+    default_dict.update(replace_dict)
+    try:
+        for key in default_dict:
+            text = text.replace(key, default_dict[key])
+    except:
+        pass
+    return text
