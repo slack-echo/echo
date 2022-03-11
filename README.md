@@ -41,8 +41,13 @@ tree --dirsfirst -vFI "$(grep -hvE '^$|^#' {,$(git rev-parse --show-toplevel)/}.
 
 ```bash
 echo/
+├── templates/
+│   ├── choices.yaml
+│   ├── echo.yaml
+│   ├── send.yaml
+│   └── shuffle.yaml
 ├── utils/
-│   ├── random.py
+│   ├── loader.py
 │   └── text.py
 ├── LICENSE
 ├── README.md
@@ -51,7 +56,7 @@ echo/
 ├── main.py
 └── requirements.txt
 
-1 directory, 8 files
+2 directories, 12 files
 ```
 
 ## License
