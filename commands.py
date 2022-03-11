@@ -1,4 +1,4 @@
-from utils.text import is_channel_mention, parse_random_command
+from utils.text import is_channel_mentioned, parse_random_command
 from utils.random import shuffle
 
 
@@ -6,7 +6,7 @@ def echo(body, logger, command, ack, say):
     logger.info(body)
     channel_id = command.get("channel_id")
     text = command.get("text")
-    channel_mentioned, channels = is_channel_mention(text)
+    channel_mentioned, channels = is_channel_mentioned(text)
     if text is None:
         ack(
             ":x: 실행되지 않았습니다."
@@ -34,7 +34,7 @@ def send(body, logger, command, ack, say):
     logger.info(body)
     user_id = command.get("user_id")
     text = command.get("text")
-    channel_mention, channels = is_channel_mention(text)
+    channel_mention, channels = is_channel_mentioned(text)
     if channel_mention:
         ack(f"#{' #'.join(channels)}로 메시지를 보냈습니다.\n> {text}")
         attachments = [

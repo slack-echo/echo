@@ -1,20 +1,16 @@
 import re
 
 
-def is_channel_mention(text):
-    if text is None:
-        return False, None
+def is_channel_mentioned(text):
+    if text:
+        channels = re.findall(r"[C|G][A-Z0-9]{10}", text)
+        return channels if channels else []
     else:
-        channels = re.findall(r"(^@[가-힣a-z0-9_-]+|\s@[가-힣a-z0-9_-]+)", text)
-        for i, _ in enumerate(channels):
-            channels[i] = channels[i].strip().strip("@")
-        return (True, channels) if channels else (False, None)
+        return []
 
 
 def parse_random_command(text):
-    if text is None:
-        return 1, [], []
-    else:
+    if text:
         if re.search(r"^help\s*", text):
             return 0, [], []
         else:
@@ -26,3 +22,5 @@ def parse_random_command(text):
                 exclude.group().split()[1:] if exclude else [],
                 include.group().split()[1:] if include else [],
             )
+    else:
+        return 1, [], []
