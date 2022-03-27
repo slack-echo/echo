@@ -13,7 +13,7 @@ from utils import blocks
 from utils.loader import read_yaml
 from utils.text import get_channels
 
-SLACK_BOT_USER_ID = read_yaml("config.yaml").get("SLACK_BOT_USER_ID")
+YAML_FILE = "config.yaml"
 help = read_yaml("config.yaml").get("help")
 
 
@@ -50,6 +50,24 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
         text = html.unescape(text)  # '<@Uxxxxxxxxxx>': str
         channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
     return (locals_.get(k, None) for k in values)
+
+
+def get_members(client: slack_sdk.web.client.WebClient, channel_id: str) -> list:
+    """
+    get members of the channel
+
+    Args:
+        client (slack_sdk.web.client.WebClient): client of slack api
+        channel_id (str): channel id to get members
+
+    Returns:
+        (list): members of the channel
+    """
+    SLACK_BOT_USER_ID = read_yaml(YAML_FILE).get("SLACK_BOT_USER_ID")
+
+    members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
+    members = list(set(members) - set(SLACK_BOT_USER_ID))
+    return members
 
 
 def echo(
@@ -137,10 +155,7 @@ def shuffle(
     logger.info(pformat(body))
 
     channel_id, user_id, text = get_values(command, ["channel_id", "user_id", "text"])
-
-    # [preprocessing]
-    members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
-    members = list(set(members) - set(SLACK_BOT_USER_ID))
+    members = get_members(client, channel_id)
     random.seed()
     random.shuffle(members)
     members = map(lambda i, user: f"{i + 1}. <@{user}>\n", *zip(*enumerate(members)))
@@ -176,10 +191,7 @@ def choices(
     logger.info(pformat(body))
 
     channel_id, user_id, text = get_values(command, ["channel_id", "user_id", "text"])
-
-    # [preprocessing]
-    members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
-    members = list(set(members) - set(SLACK_BOT_USER_ID))
+    members = get_members(client, channel_id)
     counter = Counter(members)  # Counter({'Uxxxxxxxxxx': 1, ...}): Counter
     random.seed()
     if text:
