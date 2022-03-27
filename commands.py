@@ -4,7 +4,7 @@ import random
 import re
 from collections import Counter
 from pprint import pformat
-from typing import Any, Dict
+from typing import Any, Dict, Iterable
 
 import slack_sdk
 from slack_bolt import Ack, Say
@@ -15,6 +15,41 @@ from utils.text import get_channels
 
 SLACK_BOT_USER_ID = read_yaml("config.yaml").get("SLACK_BOT_USER_ID")
 help = read_yaml("config.yaml").get("help")
+
+
+def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
+    """
+    get values from the command
+
+    Args:
+        command (dict): payload of the app.command
+        values (iterable): values to get from the command
+    value (str):
+    - token : [0-9a-zA-Z]{24}
+    - team_id : T[A-Z0-9]{10}
+    - team_domain : {team_domain}.slack.com
+    - channel_id : [C|G]A-Z0-9]{10}
+    - channel_name : #{channel_name}
+    - user_id : U[A-Z0-9]{10}
+    - user_name : {user_name}@{email_domain}
+    - context : /{command}
+    - text : {text} (if text is not empty)
+        - channels : [C|G]A-Z0-9]{10}
+    - api_app_id : A[A-Z0-9]{10}
+    - is_enterprise_install : true|false
+    - response_url : [https://hooks.slack.com/commands/{team_id}/[0-9]{13}/[0-9a-zA-Z]{24}]()
+    - trigger_id : [0-9]{13}.[0-9]{13}.[0-9a-z]{32}
+
+    Returns:
+        (iterable): values
+    """
+    command["context"] = command.pop("command")
+    list(map(exec, (f"{k}='{v}'" for k, v in command.items() if k in values)))
+    locals_ = locals()
+    if "text" in locals_:
+        text = html.unescape(text)  # '<@Uxxxxxxxxxx>': str
+        channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
+    return (locals_.get(k, None) for k in values)
 
 
 def echo(
@@ -29,11 +64,7 @@ def echo(
     """
     logger.info(pformat(body))
 
-    channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
-    text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
-    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
-    channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
-
+    channel_id, text, channels = get_values(command, ["channel_id", "text", "channels"])
     # [processing]
     # TODO:
     # [-] error handling : channel_not_found, is_archived
@@ -69,11 +100,7 @@ def send(
     """
     logger.info(pformat(body))
 
-    user_id = command.get("user_id")  # Uxxxxxxxxxx: str
-    text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
-    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
-    channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
-
+    user_id, text, channels = get_values(command, ["user_id", "text", "channels"])
     # [processing]
     # TODO:
     # [-] error handling : channel_not_found, is_archived
@@ -109,10 +136,7 @@ def shuffle(
     """
     logger.info(pformat(body))
 
-    channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
-    user_id = command.get("user_id")  # Uxxxxxxxxxx: str
-    text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
-    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
+    channel_id, user_id, text = get_values(command, ["channel_id", "user_id", "text"])
 
     # [preprocessing]
     members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
@@ -151,10 +175,7 @@ def choices(
     """
     logger.info(pformat(body))
 
-    channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
-    user_id = command.get("user_id")  # Uxxxxxxxxxx: str
-    text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
-    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
+    channel_id, user_id, text = get_values(command, ["channel_id", "user_id", "text"])
 
     # [preprocessing]
     members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
