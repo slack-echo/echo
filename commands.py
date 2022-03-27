@@ -44,11 +44,17 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
     """
     command["context"] = command.pop("command")
     filtered_dict = {k: v for k, v in command.items() if k in values}
+
     if "text" in filtered_dict:
         text = filtered_dict.pop("text")
         filtered_dict.update(text=html.unescape(text))  # '<@Uxxxxxxxxxx>': str
         filtered_dict.update(channels=get_channels(text))  # ['Cxxxxxxxxxx', ...]: list
-    return (filtered_dict.get(k, None) for k in values)
+
+    if "context" in filtered_dict and (text := command.get("text")):
+        text = html.unescape(text)
+        filtered_dict.update(context=filtered_dict.pop("context") + " " + text)
+
+    return (filtered_dict.get(k, "") for k in values)
 
 
 def get_members(client: slack_sdk.web.client.WebClient, channel_id: str) -> list:
@@ -64,7 +70,7 @@ def get_members(client: slack_sdk.web.client.WebClient, channel_id: str) -> list
     """
     SLACK_BOT_USER_ID = read_yaml(YAML_FILE).get("SLACK_BOT_USER_ID")
 
-    members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
+    members = client.conversations_members(channel=channel_id).get("members")  # type: ignore ['Uxxxxxxxxxx', ...]: list
     members = list(set(members) - set(SLACK_BOT_USER_ID))
     return members
 
@@ -158,7 +164,7 @@ def send(
         ack(text=HELP.get("send"))
 
 
-def shuffle(
+def rand(
     body: Dict[str, Any],
     logger: logging.Logger,
     client: slack_sdk.web.client.WebClient,
@@ -167,78 +173,43 @@ def shuffle(
     say: Say,
 ):
     """
-    shuffle the order of the members in the channel
+    `/shuffle` : shuffle the members of the channel
+    `/choices` : choose a random member of the channel
     """
     logger.info(pformat(body))
 
-    channel_id, user_id, text = get_values(command, ["channel_id", "user_id", "text"])
+    channel_id, user_id, text, context = get_values(command, ["channel_id", "user_id", "text", "context"])  # type: ignore
     members = get_members(client, channel_id)
+
     random.seed()
-    random.shuffle(members)
+
+    # handle the context
+    if context.startswith("/shuffle") or context.startswith("/choices all"):
+        random.shuffle(members)
+    elif context.startswith("/choices help"):
+        HELP = read_yaml(YAML_FILE).get("help")
+        ack(text=HELP.get("choices"))
+        return
+    elif context.startswith("/choices"):
+        # get the number to choose
+        if text and (num := re.search(r"^[1-9]\d*", text)):
+            num = int(num.group())
+        else:
+            num = 1
+        counter = Counter(members)  # Counter({'Uxxxxxxxxxx': 1, ...}): Counter
+        members = random.choices(tuple(counter.keys()), weights=counter.values(), k=num)
+
+    # build the message to send
     members = map(lambda i, user: f"{i + 1}. <@{user}>\n", *zip(*enumerate(members)))
 
-    # [processing]
+    # send the message
     ack()
     say(
         blocks=[
             blocks.Section(text=blocks.mrkdwn(text="".join(members))),
             blocks.Divider(),
             blocks.Context(
-                elements=[
-                    blocks.mrkdwn(
-                        text=f"<@{user_id}>님이 `/shuffle {text if text else ''}`로 랜덤 셔플하였습니다."
-                    )
-                ]
-            ),
-        ]
-    )
-
-
-def choices(
-    body: Dict[str, Any],
-    logger: logging.Logger,
-    client: slack_sdk.web.client.WebClient,
-    command: Dict[str, Any],
-    ack: Ack,
-    say: Say,
-):
-    """
-    choose a random member from the channel
-    """
-    logger.info(pformat(body))
-
-    channel_id, user_id, text = get_values(command, ["channel_id", "user_id", "text"])
-    members = get_members(client, channel_id)
-    counter = Counter(members)  # Counter({'Uxxxxxxxxxx': 1, ...}): Counter
-    random.seed()
-    if text:
-        if re.search(r"^help\s*", text):
-            ack(text=help)
-            return
-        elif num := re.search(r"^[1-9]\d*", text):
-            num = int(num.group())
-        else:
-            num = 1
-    else:
-        num = 1
-    selected_members = random.choices(tuple(counter.keys()), weights=counter.values(), k=num)  # type: ignore
-    selected_members = map(
-        lambda i, user: f"{i + 1}. <@{user}>\n", *zip(*enumerate(selected_members))
-    )
-
-    # [processing]
-    # if the command is valid, send the message to the channel
-    ack()
-    say(
-        blocks=[
-            blocks.Section(text=blocks.mrkdwn(text="".join(selected_members))),
-            blocks.Divider(),
-            blocks.Context(
-                elements=[
-                    blocks.mrkdwn(
-                        text=f"<@{user_id}>님이 `/choices {text if text else ''}`로 랜덤 선택하였습니다."
-                    )
-                ]
+                elements=[blocks.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
             ),
         ]
     )
