@@ -98,9 +98,9 @@ def echo(
                 attachments=blocks.attachments(
                     color="#d0d0d0",
                     blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
-                ),
-                channel=channel,
-            )
+                    ).to_dict(),
+                    channel=channel,
+                )
     # if the message is invalid, send help message
     else:
         ack(text=help.get("echo"))
@@ -133,7 +133,7 @@ def send(
                 attachments=blocks.attachments(
                     color="#d0d0d0",
                     blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
-                ),
+                ).to_dict(),
                 channel=channel,
             )
     # if no channel is mentioned, send help message
