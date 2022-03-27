@@ -6,7 +6,7 @@ from slack_bolt.adapter.flask import SlackRequestHandler
 
 import listeners
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 # process_before_response must be True when running on FaaS
 app = App(
