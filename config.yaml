@@ -12,3 +12,12 @@ help:
     
     :information_source: 사용법
     `/send 메시지 [#채널]` : [#채널]로 메시지 보내기 (기본값: #admin)
+  choices: |-
+    :information_source: 사용법
+    `/choices [숫자]` : [숫자]인원만큼 랜덤 선택 (기본값=1)
+    
+    :mag: 예시
+    `/choices` : 1명 랜덤 선택
+    `/choices 2` : 2명 랜덤 선택
+    `/choices all` : 모든 인원 랜덤 선택 (=`/shuffle`)
+    `/choices help` : 사용법

@@ -14,7 +14,6 @@ from utils.loader import read_yaml
 from utils.text import get_channels
 
 YAML_FILE = "config.yaml"
-help = read_yaml("config.yaml").get("help")
 
 
 def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
@@ -110,7 +109,8 @@ def echo(
 
     # if the message is invalid, send help message
     else:
-        ack(text=help.get("echo"))
+        HELP = read_yaml(YAML_FILE).get("help")
+        ack(text=HELP.get("echo"))
 
 
 def send(
@@ -151,9 +151,11 @@ def send(
                     ack(text=f"<#{channel}>로 메시지 보내기를 실패하였습니다. 채널에 앱이 존재하지 않습니다.")  # type: ignore
                 elif error == "is_archived":
                     ack(text=f"<#{channel}>로 메시지 보내기를 실패하였습니다. 채널이 보관되어 있습니다.")
+
     # if no channel is mentioned, send help message
     else:
-        ack(text=help.get("send"))
+        HELP = read_yaml(YAML_FILE).get("help")
+        ack(text=HELP.get("send"))
 
 
 def shuffle(
