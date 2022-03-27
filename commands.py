@@ -1,3 +1,4 @@
+import html
 import json
 import logging
 import random
@@ -10,7 +11,7 @@ import slack_sdk
 from slack_bolt import Ack, Say
 
 from utils.loader import read_yaml
-from utils.text import get_mentioned_channels, text_replace
+from utils.text import get_channels
 
 
 def echo(
@@ -42,9 +43,9 @@ def echo(
 
     # [preprocessing]
     # replace &lt; and |&gt; with < and > respectively
-    text = text_replace(text)  # 'text <@Uxxxxxxxxxx>': str
+    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
     # get mentioned channels from the text
-    mentioned_channels = get_mentioned_channels(text)  # ['Cxxxxxxxxxx', ...]: list
+    channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
 
     # build the message to send
     template = read_yaml("templates/echo.yaml")  # dict from yaml
@@ -61,7 +62,7 @@ def echo(
         # send the message to the channel
         say(text=text)
         # send the message to the mentioned channels
-        for channel in mentioned_channels:
+        for channel in channels:
             say(text=pretext, attachments=json.loads(attachments), channel=channel)
     # if the message is invalid, send help message
     else:
@@ -97,13 +98,13 @@ def send(
 
     # [preprocessing]
     # replace &lt; and |&gt; with < and > respectively
-    text = text_replace(text)  # 'text <@Uxxxxxxxxxx>': str
+    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
     # get mentioned channels from the text
-    mentioned_channels = get_mentioned_channels(text)  # ['Cxxxxxxxxxx', ...]: list
+    channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
 
     # build the message to send
     template = read_yaml("templates/send.yaml")  # dict from yaml
-    send = template["text"]["send"].format(channel="> <#".join(mentioned_channels), text=text)  # type: ignore # formatted str
+    send = template["text"]["send"].format(channel="> <#".join(channels), text=text)  # type: ignore # formatted str
     receive = template["text"]["receive"].format(user_id=user_id)  # formatted str
     attachments = template["attachments"].format(text)  # formatted json
     help = template["text"]["help"]  # str
@@ -113,10 +114,10 @@ def send(
     # [-] error handling : channel_not_found, is_archived
     # [-] preview message
     # if any channel is mentioned, send the message to the channel
-    if mentioned_channels:
+    if channels:
         ack(text=send)
         # send the message to the mentioned channels
-        for channel in mentioned_channels:
+        for channel in channels:
             say(text=receive, attachments=json.loads(attachments), channel=channel)
     # if no channel is mentioned, send help message
     else:
@@ -151,6 +152,7 @@ def shuffle(
     channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
     user_id = command.get("user_id")  # Uxxxxxxxxxx: str
     text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
+    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
 
     # [preprocessing]
     members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
@@ -198,6 +200,7 @@ def choices(
     channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
     user_id = command.get("user_id")  # Uxxxxxxxxxx: str
     text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
+    text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
 
     # [preprocessing]
     members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
