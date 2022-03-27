@@ -1,4 +1,4 @@
-import commands
+from . import commands
 
 
 def listen(app):
