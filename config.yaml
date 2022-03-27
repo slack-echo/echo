@@ -1,0 +1,14 @@
+SLACK_BOT_USER_ID: 
+  - U02JD66EHFB
+  - U02ELLD0XQ9
+help:
+  - echo: |-
+      :x: 실행되지 않았습니다.
+      
+      :information_source: 사용법
+      `/echo 메시지 [#채널]` : 현재 채널에서 에코 메시지 + [#채널] 멘션 알림
+  - send: |-
+      :x: 실행되지 않았습니다.
+      
+      :information_source: 사용법
+      `/send 메시지 [#채널]` : [#채널]로 메시지 보내기 (기본값: #admin)

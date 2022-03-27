@@ -1,8 +1,6 @@
 text:
   context: |-
     <@{user_id}>님이 `/choices {text}`로 랜덤 선택하였습니다.
-  numbered-user: |-
-    {num}. <@{user}>\n
   help: |-
     :information_source: 사용법
     `/choices [숫자] [옵션]` : [숫자]인원만큼 랜덤 선택 (기본값=1)
@@ -19,24 +17,3 @@ text:
 
     :bulb: 팁
     `+` 옵션을 이용하여 채널 외부 인원을 포함하거나, 추가한 횟수만큼 선택될 확률을 높일 수 있습니다.
-blocks: >-
-  [
-    {{
-        "type": "section",
-        "text": {{
-            "type": "mrkdwn",
-            "text": "{0}",
-            "verbatim": false
-        }}
-    }},
-    {{
-        "type": "context",
-        "elements": [
-            {{
-                "type": "mrkdwn",
-                "text": "{1}",
-                "verbatim": false
-            }}
-        ]
-    }}
-  ]

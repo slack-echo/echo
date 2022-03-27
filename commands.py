@@ -1,5 +1,4 @@
 import html
-import json
 import logging
 import random
 import re
@@ -10,8 +9,12 @@ from typing import Any, Dict
 import slack_sdk
 from slack_bolt import Ack, Say
 
+from utils import blocks
 from utils.loader import read_yaml
 from utils.text import get_channels
+
+SLACK_BOT_USER_ID = read_yaml("config.yaml").get("SLACK_BOT_USER_ID")
+help = read_yaml("config.yaml").get("help")
 
 
 def echo(
@@ -47,12 +50,6 @@ def echo(
     # get mentioned channels from the text
     channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
 
-    # build the message to send
-    template = read_yaml("templates/echo.yaml")  # dict from yaml
-    pretext = template["text"]["pretext"].format(channel_id=channel_id)  # formatted str
-    attachments = template["attachments"].format(text)  # formatted json
-    help = template["text"]["help"]  # str
-
     # [processing]
     # TODO:
     # [-] error handling : channel_not_found, is_archived
@@ -63,10 +60,17 @@ def echo(
         say(text=text)
         # send the message to the mentioned channels
         for channel in channels:
-            say(text=pretext, attachments=json.loads(attachments), channel=channel)
+            say(
+                text=f"이 채널이 <#{channel_id}>에서 멘션되었습니다.",
+                attachments=blocks.attachments(
+                    color="#d0d0d0",
+                    blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
+                ),
+                channel=channel,
+            )
     # if the message is invalid, send help message
     else:
-        ack(text=help)
+        ack(text=help.get("echo"))
 
 
 def send(
@@ -102,26 +106,26 @@ def send(
     # get mentioned channels from the text
     channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
 
-    # build the message to send
-    template = read_yaml("templates/send.yaml")  # dict from yaml
-    send = template["text"]["send"].format(channel="> <#".join(channels), text=text)  # type: ignore # formatted str
-    receive = template["text"]["receive"].format(user_id=user_id)  # formatted str
-    attachments = template["attachments"].format(text)  # formatted json
-    help = template["text"]["help"]  # str
-
     # [processing]
     # TODO:
     # [-] error handling : channel_not_found, is_archived
     # [-] preview message
     # if any channel is mentioned, send the message to the channel
     if channels:
-        ack(text=send)
+        ack(text=f"<#{'> <#'.join(channels)}>로 메시지를 보냈습니다.\n> {text}")
         # send the message to the mentioned channels
         for channel in channels:
-            say(text=receive, attachments=json.loads(attachments), channel=channel)
+            say(
+                text=f"<@{user_id}>님이 보낸 메시지 입니다.",
+                attachments=blocks.attachments(
+                    color="#d0d0d0",
+                    blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
+                ),
+                channel=channel,
+            )
     # if no channel is mentioned, send help message
     else:
-        ack(text=help)
+        ack(text=help.get("send"))
 
 
 def shuffle(
@@ -156,20 +160,26 @@ def shuffle(
 
     # [preprocessing]
     members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
-    # members.remove("U02EE3TDD5J")
+    members = list(set(members) - set(SLACK_BOT_USER_ID))
     random.seed()
     random.shuffle(members)
-
-    # build the message to send
-    template = read_yaml("templates/shuffle.yaml")
-    blocks = template["blocks"]
-    context = template["text"]["context"].format(user_id=user_id, text=text if text else "")  # type: ignore
-    numbered_user_list = lambda i, user: template["text"]["numbered-user"].format(num=i + 1, user=user)  # type: ignore
+    members = map(lambda i, user: f"{i + 1}. <@{user}>\n", *zip(*enumerate(members)))
 
     # [processing]
     ack()
-    shuffled_member_list = "".join(map(numbered_user_list, *zip(*enumerate(members))))  # type: ignore
-    say(blocks=json.loads(blocks.format(shuffled_member_list, context)))
+    say(
+        blocks=[
+            blocks.Section(text=blocks.mrkdwn(text="".join(members))),
+            blocks.Divider(),
+            blocks.Context(
+                elements=[
+                    blocks.mrkdwn(
+                        text=f"<@{user_id}>님이 `/shuffle {text if text else ''}`로 랜덤 셔플하였습니다."
+                    )
+                ]
+            ),
+        ]
+    )
 
 
 def choices(
@@ -204,7 +214,7 @@ def choices(
 
     # [preprocessing]
     members = client.conversations_members(channel=channel_id).get("members")  # type: ignore [Uxxxxxxxxxx, ...]: list
-    # members.remove("U02EE3TDD5J")
+    members = list(set(members) - set(SLACK_BOT_USER_ID))
     counter = Counter(members)  # Counter({'Uxxxxxxxxxx': 1, ...}): Counter
     random.seed()
     if text:
@@ -218,16 +228,23 @@ def choices(
     else:
         num = 1
     selected_members = random.choices(tuple(counter.keys()), weights=counter.values(), k=num)  # type: ignore
-
-    # build the message to send
-    template = read_yaml("templates/choices.yaml")
-    blocks = template["blocks"]
-    context = template["text"]["context"].format(user_id=user_id, text=text if text else "")  # type: ignore
-    numbered_user_list = lambda i, user: template["text"]["numbered-user"].format(num=i + 1, user=user)  # type: ignore
-    help = template["text"]["help"].format(user_id=user_id)
+    selected_members = map(
+        lambda i, user: f"{i + 1}. <@{user}>\n", *zip(*enumerate(selected_members))
+    )
 
     # [processing]
     # if the command is valid, send the message to the channel
     ack()
-    selected_member_list = "".join(map(numbered_user_list, *zip(*enumerate(selected_members))))  # type: ignore
-    say(blocks=json.loads(blocks.format(selected_member_list, context)))
+    say(
+        blocks=[
+            blocks.Section(text=blocks.mrkdwn(text="".join(selected_members))),
+            blocks.Divider(),
+            blocks.Context(
+                elements=[
+                    blocks.mrkdwn(
+                        text=f"<@{user_id}>님이 `/choices {text if text else ''}`로 랜덤 선택하였습니다."
+                    )
+                ]
+            ),
+        ]
+    )

@@ -1,29 +1,4 @@
 text:
-  context: |-
-    <@{user_id}>님이 `/shuffle {text}`로 랜덤 셔플하였습니다.
-  numbered-user: |-
-    {num}. <@{user}>\n
   help: |-
     :information_source: 사용법
     `/shuffle` : 채널에 있는 인원 모두 섞기
-blocks: >-
-  [
-    {{
-        "type": "section",
-        "text": {{
-            "type": "mrkdwn",
-            "text": "{0}",
-            "verbatim": false
-        }}
-    }},
-    {{
-        "type": "context",
-        "elements": [
-            {{
-                "type": "mrkdwn",
-                "text": "{1}",
-                "verbatim": false
-            }}
-        ]
-    }}
-  ]
