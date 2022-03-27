@@ -1,11 +1,12 @@
 # echo
 
-![GitHub.](https://img.shields.io/github/license/skkuinit/echo?logo=github)
+[![GitHub.](https://img.shields.io/github/license/skkuinit/echo?logo=github)](LICENSE)
 
 ## Dependencies
 
 - Flask
 - slack-bolt
+- PyYAML
 
 ### Install packages
 
@@ -41,22 +42,20 @@ tree --dirsfirst -vFI "$(grep -hvE '^$|^#' {,$(git rev-parse --show-toplevel)/}.
 
 ```bash
 echo/
-├── templates/
-│   ├── choices.yaml
-│   ├── echo.yaml
-│   ├── send.yaml
-│   └── shuffle.yaml
 ├── utils/
-│   ├── loader.py
-│   └── text.py
+│   ├── blocks.py
+│   ├── loader.py
+│   └── text.py
 ├── LICENSE
 ├── README.md
 ├── commands.py
+├── config.yaml
 ├── listeners.py
 ├── main.py
 └── requirements.txt
 
-2 directories, 12 files
+1 directory, 10 files
+
 ```
 
 ## License
