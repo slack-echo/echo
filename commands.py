@@ -26,28 +26,12 @@ def echo(
 ):
     """
     @echo will send a message on the channel instead of you. (anonymous message)
-
-    Args:
-        body: the body of the request
-        logger: the logger
-        command: the command
-        ack: the ack function
-        say: the say function
-
-    Returns:
-        None
     """
     logger.info(pformat(body))
 
-    # [from request]
-    # get channel id and text from the command
     channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
     text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
-
-    # [preprocessing]
-    # replace &lt; and |&gt; with < and > respectively
     text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
-    # get mentioned channels from the text
     channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
 
     # [processing]
@@ -82,28 +66,12 @@ def send(
 ):
     """
     send a message to mentioned channels
-
-    Args:
-        body: the body of the request
-        logger: the logger
-        command: the command
-        ack: the ack function
-        say: the say function
-
-    Returns:
-        None
     """
     logger.info(pformat(body))
 
-    # [from request]
-    # get user id and text from the command
     user_id = command.get("user_id")  # Uxxxxxxxxxx: str
     text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
-
-    # [preprocessing]
-    # replace &lt; and |&gt; with < and > respectively
     text = html.unescape(text)  # 'text <@Uxxxxxxxxxx>': str
-    # get mentioned channels from the text
     channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
 
     # [processing]
@@ -137,22 +105,10 @@ def shuffle(
     say: Say,
 ):
     """
-
-    Args:
-        body: the body of the request
-        logger: the logger
-        client: the client
-        command: the command
-        ack: the ack function
-        say: the say function
-
-    Returns:
-        None
+    shuffle the order of the members in the channel
     """
     logger.info(pformat(body))
 
-    # [from request]
-    # get channel id, user id and text from the command
     channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
     user_id = command.get("user_id")  # Uxxxxxxxxxx: str
     text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
@@ -191,22 +147,10 @@ def choices(
     say: Say,
 ):
     """
-
-    Args:
-        body: the body of the request
-        logger: the logger
-        client: the client
-        command: the command
-        ack: the ack function
-        say: the say function
-
-    Returns:
-        None
+    choose a random member from the channel
     """
     logger.info(pformat(body))
 
-    # [from request]
-    # get channel id, user id and text from the command
     channel_id = command.get("channel_id")  # Cxxxxxxxxx: str
     user_id = command.get("user_id")  # Uxxxxxxxxxx: str
     text = command.get("text")  # 'text &lt;@Uxxxxxxxxxx|&gt;': str
