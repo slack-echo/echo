@@ -44,12 +44,12 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
         (iterable): values
     """
     command["context"] = command.pop("command")
-    list(map(exec, (f"{k}='{v}'" for k, v in command.items() if k in values)))
-    locals_ = locals()
-    if "text" in locals_:
-        text = html.unescape(text)  # '<@Uxxxxxxxxxx>': str
-        channels = get_channels(text)  # ['Cxxxxxxxxxx', ...]: list
-    return (locals_.get(k, None) for k in values)
+    filtered_dict = {k: v for k, v in command.items() if k in values}
+    if "text" in filtered_dict:
+        text = filtered_dict.pop("text")
+        filtered_dict.update(text=html.unescape(text))  # '<@Uxxxxxxxxxx>': str
+        filtered_dict.update(channels=get_channels(text))  # ['Cxxxxxxxxxx', ...]: list
+    return (filtered_dict.get(k, None) for k in values)
 
 
 def get_members(client: slack_sdk.web.client.WebClient, channel_id: str) -> list:
