@@ -13,7 +13,7 @@ from utils import blocks
 from utils.loader import read_yaml
 from utils.text import get_channels
 
-YAML_FILE = "https://raw.githubusercontent.com/skkuinit/echo/main/config.yaml"
+YAML_FILE = "https://api.github.com/repos/skkuinit/echo/contents/config.yaml"
 
 
 def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
