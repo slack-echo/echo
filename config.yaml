@@ -1,6 +1,7 @@
 SLACK_BOT_USER_ID: 
-  - U02JD66EHFB
-  - U02ELLD0XQ9
+  - U02EE3TDD5J # Echo
+  - U0259K4B8F4 # Echo_test
+  - U01P7TZHC1M # Simple Poll
 help:
   echo: |-
     :x: 실행되지 않았습니다.
