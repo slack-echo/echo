@@ -42,19 +42,20 @@ tree --dirsfirst -vFI "$(grep -hvE '^$|^#' {,$(git rev-parse --show-toplevel)/}.
 
 ```bash
 echo/
+├── listeners/
+│   ├── __init__.py
+│   ├── commands.py
 ├── utils/
 │   ├── blocks.py
 │   ├── loader.py
 │   └── text.py
 ├── LICENSE
 ├── README.md
-├── commands.py
 ├── config.yaml
-├── listeners.py
 ├── main.py
 └── requirements.txt
 
-1 directory, 10 files
+2 directories, 12 files
 
 ```
 
