@@ -6,3 +6,4 @@ def listen(app):
     app.command("/send")(commands.send)
     app.command("/shuffle")(commands.rand)
     app.command("/choices")(commands.rand)
+    app.command("/meet")(commands.meet)

@@ -213,3 +213,41 @@ def rand(
             ),
         ]
     )
+
+
+def meet(
+    body: Dict[str, Any],
+    logger: logging.Logger,
+    command: Dict[str, Any],
+    ack: Ack,
+    say: Say,
+):
+    """
+    `/meet` : create a link for google meet
+    """
+    logger.info(pformat(body))
+
+    channel_name, user_id, context = get_values(command, ["channel_name", "user_id", "context"])  # type: ignore
+
+    # get the meeting link
+    *_, code = channel_name.split("_")
+    code = re.sub("[^a-z0-9-]+", "", code)
+    link = (
+        "https://accounts.google.com/AccountChooser"
+        + "?hd=g.skku.edu"
+        + f"&continue=https://g.co/meet/{code}"
+        + "&flowName=GlifWebSignIn"
+        + "&flowEntry=AccountChooser"
+    )
+
+    # send the message
+    ack()
+    say(
+        blocks=[
+            blocks.Section(text=blocks.mrkdwn(text=f"> *<{link}|Google Meet 참여하기>*")),
+            blocks.Divider(),
+            blocks.Context(
+                elements=[blocks.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
+            ),
+        ]
+    )
