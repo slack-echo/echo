@@ -83,7 +83,7 @@ def echo(
     say: Say,
 ):
     """
-    @echo will send a message on the channel instead of you. (anonymous message)
+    `/echo` : @echo will send a message on the channel instead of you. (anonymous message)
     """
     logger.info(pformat(body))
 
@@ -127,7 +127,7 @@ def send(
     say: Say,
 ):
     """
-    send a message to mentioned channels
+    `/send` : send a message to mentioned channels
     """
     logger.info(pformat(body))
 
