@@ -229,11 +229,15 @@ def meet(
     """
     logger.info(pformat(body))
 
-    channel_name, user_id, context = get_values(command, ["channel_name", "user_id", "context"])  # type: ignore
+    channel_name, user_id, user_name, users, context = get_values(command, ["channel_name", "user_id", "user_name", "users", "context"])  # type: ignore
 
     # get the meeting link
-    *_, code = channel_name.split("_")
-    code = re.sub("[^a-z0-9-]+", "", code)
+    if users:
+        code = user_name.replace(".", "-")
+    else:
+        *_, code = channel_name.split("_")
+        code = re.sub("[^a-z0-9-]+", "", code)
+
     link = (
         "https://accounts.google.com/AccountChooser"
         + "?hd=g.skku.edu"
@@ -241,15 +245,17 @@ def meet(
         + "&flowName=GlifWebSignIn"
         + "&flowEntry=AccountChooser"
     )
+    block = [
+        blocks.Section(text=blocks.mrkdwn(text=f"> *<{link}|Google Meet 참여하기>*")),
+        blocks.Divider(),
+        blocks.Context(
+            elements=[blocks.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
+        ),
+    ]
 
     # send the message
     ack()
-    say(
-        blocks=[
-            blocks.Section(text=blocks.mrkdwn(text=f"> *<{link}|Google Meet 참여하기>*")),
-            blocks.Divider(),
-            blocks.Context(
-                elements=[blocks.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
-            ),
-        ]
-    )
+    for user in users:
+        say(username="Google Meet", icon_emoji=":meet:", blocks=block, channel=user)
+    else:
+        say(username="Google Meet", icon_emoji=":meet:", blocks=block)
