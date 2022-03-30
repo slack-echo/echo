@@ -5,8 +5,10 @@
 ## Dependencies
 
 - Flask
-- slack-bolt
 - PyYAML
+- requests
+- slack_bolt
+- slack_sdk
 
 ### Install packages
 
@@ -55,7 +57,7 @@ echo/
 ├── main.py
 └── requirements.txt
 
-2 directories, 12 files
+2 directories, 10 files
 
 ```
 
