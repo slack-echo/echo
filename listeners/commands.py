@@ -92,33 +92,33 @@ def echo(
     channel_id, text, channels = get_values(command, ["channel_id", "text", "channels"])
 
     # if the message is valid, send the message to the channel
+    # else the message is invalid, send help message
     if text:
         ack()
         say(text=text)
-
-        # mention the channel in the message
-        for channel in channels:
-            try:
-                say(
-                    text=f"이 채널이 <#{channel_id}>에서 멘션되었습니다.",
-                    attachments=blocks.attachments(
-                        color="#d0d0d0",
-                        blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
-                    ).to_dict(),
-                    channel=channel,
-                )
-            except slack_sdk.errors.SlackApiError as e:
-                error = e.response["error"]
-                logger.error(error)
-                if error == "channel_not_found":
-                    ack(text=f"메시지를 보낸 후 <#{channel}>로 멘션 알림에 실패하였습니다. 채널에 앱이 존재하지 않습니다.")  # type: ignore
-                elif error == "is_archived":
-                    ack(text=f"메시지를 보낸 후 <#{channel}>로 멘션 알림에 실패하였습니다. 채널이 보관되어 있습니다.")
-
-    # if the message is invalid, send help message
     else:
         HELP = read_yaml(YAML_FILE).get("help")
         ack(text=HELP.get("echo"))
+        return
+
+    # mention the channel in the message
+    for channel in channels:
+        try:
+            say(
+                text=f"이 채널이 <#{channel_id}>에서 멘션되었습니다.",
+                attachments=blocks.attachments(
+                    color="#d0d0d0",
+                    blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
+                ).to_dict(),
+                channel=channel,
+            )
+        except slack_sdk.errors.SlackApiError as e:
+            error = e.response["error"]
+            logger.error(error)
+            if error == "channel_not_found":
+                ack(text=f"메시지를 보낸 후 <#{channel}>로 멘션 알림에 실패하였습니다. 채널에 앱이 존재하지 않습니다.")
+            elif error == "is_archived":
+                ack(text=f"메시지를 보낸 후 <#{channel}>로 멘션 알림에 실패하였습니다. 채널이 보관되어 있습니다.")
 
 
 def send(
@@ -138,32 +138,31 @@ def send(
     # TODO:
     # [-] preview message
     # if any channel is mentioned, send the message to the channel
+    # else no channel is mentioned, send help message
     if channels:
         ack(text=f"<#{'> <#'.join(channels)}>로 메시지를 보냅니다.\n> {text}")
-
-        # send the message to the channels in the message
-        for channel in channels:
-            try:
-                say(
-                    text=f"<@{user_id}>님이 보낸 메시지 입니다.",
-                    attachments=blocks.attachments(
-                        color="#d0d0d0",
-                        blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
-                    ).to_dict(),
-                    channel=channel,
-                )
-            except slack_sdk.errors.SlackApiError as e:
-                error = e.response["error"]
-                logger.error(error)
-                if error == "channel_not_found":
-                    ack(text=f"<#{channel}>로 메시지 보내기를 실패하였습니다. 채널에 앱이 존재하지 않습니다.")  # type: ignore
-                elif error == "is_archived":
-                    ack(text=f"<#{channel}>로 메시지 보내기를 실패하였습니다. 채널이 보관되어 있습니다.")
-
-    # if no channel is mentioned, send help message
     else:
         HELP = read_yaml(YAML_FILE).get("help")
         ack(text=HELP.get("send"))
+
+    # send the message to the channels in the message
+    for channel in channels:
+        try:
+            say(
+                text=f"<@{user_id}>님이 보낸 메시지 입니다.",
+                attachments=blocks.attachments(
+                    color="#d0d0d0",
+                    blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
+                ).to_dict(),
+                channel=channel,
+            )
+        except slack_sdk.errors.SlackApiError as e:
+            error = e.response["error"]
+            logger.error(error)
+            if error == "channel_not_found":
+                ack(text=f"<#{channel}>로 메시지 보내기를 실패하였습니다. 채널에 앱이 존재하지 않습니다.")
+            elif error == "is_archived":
+                ack(text=f"<#{channel}>로 메시지 보내기를 실패하였습니다. 채널이 보관되어 있습니다.")
 
 
 def rand(
