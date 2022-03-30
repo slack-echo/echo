@@ -11,7 +11,7 @@ from slack_bolt import Ack, Say
 
 from utils import blocks
 from utils.loader import read_yaml
-from utils.text import get_channels
+from utils.text import get_channels, get_users
 
 YAML_FILE = "https://api.github.com/repos/skkuinit/echo/contents/config.yaml"
 
@@ -34,6 +34,7 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
     - context : /{command}
     - text : {text} (if text is not empty)
         - channels : [C|G]A-Z0-9]{10}
+        - users : U[A-Z0-9]{10}
     - api_app_id : A[A-Z0-9]{10}
     - is_enterprise_install : true|false
     - response_url : [https://hooks.slack.com/commands/{team_id}/[0-9]{13}/[0-9a-zA-Z]{24}]()
@@ -42,16 +43,17 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
     Returns:
         (iterable): values
     """
-    command["context"] = command.pop("command")
+    command.update(context=command.pop("command"))
+    command.update(
+        text=html.unescape(text := command.pop("text", ""))
+    )  # '<@Uxxxxxxxxxx>': str
     filtered_dict = {k: v for k, v in command.items() if k in values}
 
-    if "text" in filtered_dict:
-        text = filtered_dict.pop("text")
-        filtered_dict.update(text=html.unescape(text))  # '<@Uxxxxxxxxxx>': str
+    if "channels" in values:
         filtered_dict.update(channels=get_channels(text))  # ['Cxxxxxxxxxx', ...]: list
-
-    if "context" in filtered_dict and (text := command.get("text")):
-        text = html.unescape(text)
+    if "users" in values:
+        filtered_dict.update(users=get_users(text))  # ['Uxxxxxxxxxx', ...]: list
+    if "context" in filtered_dict and text:
         filtered_dict.update(context=filtered_dict.pop("context") + " " + text)
 
     return (filtered_dict.get(k, "") for k in values)
