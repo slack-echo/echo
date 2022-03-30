@@ -47,6 +47,7 @@ echo/
 ├── listeners/
 │   ├── __init__.py
 │   ├── commands.py
+│   └── shortcuts.py
 ├── utils/
 │   ├── blocks.py
 │   ├── loader.py
@@ -57,7 +58,7 @@ echo/
 ├── main.py
 └── requirements.txt
 
-2 directories, 10 files
+2 directories, 11 files
 
 ```
 
