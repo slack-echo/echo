@@ -92,21 +92,43 @@ def echo(
 ):
     """
     `/echo` : @echo will send a message on the channel instead of you. (anonymous message)
+    `/anonymous` : send a message on the channel as "익명" with an anonymous profile image. (anonymous message)
+    `/disguise` : send a message on the channel in disguise as you wish. (anonymous message)
     """
     logger.info(pformat(body))
 
-    channel_id, text, channels = get_values(command, ["channel_id", "text", "channels"])
+    channel_id, text, context = get_values(command, ["channel_id", "text", "context"])
 
     # if the message is valid, send the message to the channel
     # else the message is invalid, send help message
     if text:
         ack()
-        say(text=text)
+        if context.startswith("/echo"):
+            say(text=text)
+        elif context.startswith("/anonymous"):
+            say(text=text, username="익명", icon_emoji=":bust_in_silhouette:")
+        elif context.startswith("/disguise"):
+            # get url for profile image
+            url, *_ = get_urls(text) or ("",)
+            text = re.sub(re.escape(url) + "\s+", "", text) if url else text
+            url = url.strip("<>")
+
+            # get emoji for profile image
+            emoji, *_ = (None,) if url else (get_emojis(text) or (":bust_in_silhouette:",))  # type: ignore
+            text = re.sub(emoji + "\s+", "", text, 1) if emoji else text
+
+            # get username for profile
+            username, *_ = text.split()
+            text = re.sub(username + "\s+", "", text, 1)
+
+            kwagrs = {"username": username, "icon_emoji": emoji, "icon_url": url}
+            say(text=text, **kwagrs)
     else:
         HELP = read_yaml(YAML_FILE).get("help")
         ack(text=HELP.get("echo"))
         return
 
+    channels = get_channels(text)
     # mention the channel in the message
     for channel in channels:
         try:
