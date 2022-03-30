@@ -11,7 +11,7 @@ from slack_bolt import Ack, Say
 
 from utils import blocks
 from utils.loader import read_yaml
-from utils.text import get_channels, get_users
+from utils.text import get_channels, get_users, get_emojis, get_urls
 
 YAML_FILE = "https://api.github.com/repos/skkuinit/echo/contents/config.yaml"
 
@@ -35,6 +35,8 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
     - text : {text} (if text is not empty)
         - channels : [C|G]A-Z0-9]{10}
         - users : U[A-Z0-9]{10}
+        - emojis : :emoji:
+        - urls : <https?://[^\s]+>
     - api_app_id : A[A-Z0-9]{10}
     - is_enterprise_install : true|false
     - response_url : [https://hooks.slack.com/commands/{team_id}/[0-9]{13}/[0-9a-zA-Z]{24}]()
@@ -53,6 +55,10 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
         filtered_dict.update(channels=get_channels(text))  # ['Cxxxxxxxxxx', ...]: list
     if "users" in values:
         filtered_dict.update(users=get_users(text))  # ['Uxxxxxxxxxx', ...]: list
+    if "emojis" in values:
+        filtered_dict.update(emojis=get_emojis(text))
+    if "urls" in values:
+        filtered_dict.update(urls=get_urls(text))
     if "context" in filtered_dict and text:
         filtered_dict.update(context=filtered_dict.pop("context") + " " + text)
 
