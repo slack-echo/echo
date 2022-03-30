@@ -83,6 +83,14 @@ def get_members(client: slack_sdk.web.client.WebClient, channel_id: str) -> list
     return members
 
 
+def get_help_message(context: str) -> str:
+    """
+    get help message for the yaml file
+    """
+    help_msg = read_yaml(YAML_FILE).get("help")
+    return help_msg.get(context)
+
+
 def echo(
     body: Dict[str, Any],
     logger: logging.Logger,
@@ -101,13 +109,22 @@ def echo(
 
     # if the message is valid, send the message to the channel
     # else the message is invalid, send help message
-    if text:
-        ack()
-        if context.startswith("/echo"):
+    if context.startswith("/echo"):
+        if text:
+            ack()
             say(text=text)
-        elif context.startswith("/anonymous"):
+        else:
+            ack(text=get_help_message("echo"))
+            return
+    elif context.startswith("/anonymous"):
+        if text:
+            ack()
             say(text=text, username="익명", icon_emoji=":bust_in_silhouette:")
-        elif context.startswith("/disguise"):
+        else:
+            ack(text=get_help_message("anonymous"))
+            return
+    elif context.startswith("/disguise"):
+        if text:
             # get url for profile image
             url, *_ = get_urls(text) or ("",)
             text = re.sub(re.escape(url) + "\s+", "", text) if url else text
@@ -122,11 +139,11 @@ def echo(
             text = re.sub(username + "\s+", "", text, 1)
 
             kwagrs = {"username": username, "icon_emoji": emoji, "icon_url": url}
+            ack()
             say(text=text, **kwagrs)
-    else:
-        HELP = read_yaml(YAML_FILE).get("help")
-        ack(text=HELP.get("echo"))
-        return
+        else:
+            ack(text=get_help_message("disguise"))
+            return
 
     channels = get_channels(text)
     # mention the channel in the message
@@ -170,8 +187,7 @@ def send(
     if channels:
         ack(text=f"<#{'> <#'.join(channels)}>로 메시지를 보냅니다.\n> {text}")
     else:
-        HELP = read_yaml(YAML_FILE).get("help")
-        ack(text=HELP.get("send"))
+        ack(text=get_help_message("send"))
 
     # send the message to the channels in the message
     for channel in channels:
@@ -216,8 +232,7 @@ def rand(
     if context.startswith("/shuffle") or context.startswith("/choices all"):
         random.shuffle(members)
     elif context.startswith("/choices help"):
-        HELP = read_yaml(YAML_FILE).get("help")
-        ack(text=HELP.get("choices"))
+        ack(text=get_help_message("choices"))
         return
     elif context.startswith("/choices"):
         # get the number to choose
