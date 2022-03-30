@@ -7,7 +7,25 @@ help:
     :x: 실행되지 않았습니다.
     
     :information_source: 사용법
-    `/echo 메시지 [#채널]` : 현재 채널에서 에코 메시지 + [#채널] 멘션 알림
+    `/echo [메시지]` : 현재 채널에서 에코 메시지
+    - [#채널] 멘션 알림 적용
+  anonymous: |-
+    :x: 실행되지 않았습니다.
+    
+    :information_source: 사용법
+    `/anonymous [메시지]` : 현재 채널에서 익명 메시지
+    - [#채널] 멘션 알림 적용
+  disguise: |-
+    :x: 실행되지 않았습니다.
+      
+    :information_source: 사용법
+    `/disguise [:이모지: 또는 이미지URL] [이름] [메시지]` : 현재 채널에서 익명 메시지
+    - [:이모지: 또는 이미지URL] 프로필 이미지 적용 (이미지URL 우선순위)
+    - [이름] 프로필 이름 적용
+    - [#채널] 멘션 알림 적용
+
+    :mag: 예시
+    `/disguise :ghost: 유령 Trick or Treat!`
   send: |-
     :x: 실행되지 않았습니다.
     
