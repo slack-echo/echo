@@ -8,10 +8,9 @@ from typing import Any, Dict, Iterable
 
 import slack_sdk
 from slack_bolt import Ack, Say
-
 from utils import blocks
 from utils.loader import read_yaml
-from utils.text import get_channels, get_users, get_emojis, get_urls
+from utils.text import get_channels, get_emojis, get_urls, get_users
 
 YAML_FILE = "https://api.github.com/repos/skkuinit/echo/contents/config.yaml"
 
@@ -24,37 +23,35 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
         command (dict): payload of the app.command
         values (iterable): values to get from the command
     value (str):
-    - token : [0-9a-zA-Z]{24}
-    - team_id : T[A-Z0-9]{10}
-    - team_domain : {team_domain}.slack.com
+    - api_app_id : A[A-Z0-9]{10}
     - channel_id : [C|G]A-Z0-9]{10}
     - channel_name : #{channel_name}
+    - command(context) : /{command}
+    - is_enterprise_install : true|false
+    - response_url : https://hooks.slack.com/commands/{team_id}/[0-9]{13}/[0-9a-zA-Z]{24}
+    - team_domain : {team_domain}.slack.com
+    - team_id : T[A-Z0-9]{10}
+    - text : {text} (if text is not empty)
+    - token : [0-9a-zA-Z]{24}
+    - trigger_id : [0-9]{13}.[0-9]{13}.[0-9a-z]{32}
     - user_id : U[A-Z0-9]{10}
     - user_name : {user_name}@{email_domain}
-    - context : /{command}
-    - text : {text} (if text is not empty)
         - channels : [C|G]A-Z0-9]{10}
-        - users : U[A-Z0-9]{10}
         - emojis : :emoji:
         - urls : <https?://[^\s]+>
-    - api_app_id : A[A-Z0-9]{10}
-    - is_enterprise_install : true|false
-    - response_url : [https://hooks.slack.com/commands/{team_id}/[0-9]{13}/[0-9a-zA-Z]{24}]()
-    - trigger_id : [0-9]{13}.[0-9]{13}.[0-9a-z]{32}
+        - users : U[A-Z0-9]{10}
 
     Returns:
         (iterable): values
     """
     command.update(context=command.pop("command"))
-    command.update(
-        text=html.unescape(text := command.pop("text", ""))
-    )  # '<@Uxxxxxxxxxx>': str
+    command.update(text=html.unescape(text := command.pop("text", "")))
     filtered_dict = {k: v for k, v in command.items() if k in values}
 
     if "channels" in values:
-        filtered_dict.update(channels=get_channels(text))  # ['Cxxxxxxxxxx', ...]: list
+        filtered_dict.update(channels=get_channels(text))
     if "users" in values:
-        filtered_dict.update(users=get_users(text))  # ['Uxxxxxxxxxx', ...]: list
+        filtered_dict.update(users=get_users(text))
     if "emojis" in values:
         filtered_dict.update(emojis=get_emojis(text))
     if "urls" in values:
@@ -78,7 +75,7 @@ def get_members(client: slack_sdk.web.client.WebClient, channel_id: str) -> list
     """
     SLACK_BOT_USER_ID = read_yaml(YAML_FILE).get("SLACK_BOT_USER_ID")
 
-    members = client.conversations_members(channel=channel_id).get("members")  # type: ignore ['Uxxxxxxxxxx', ...]: list
+    members = client.conversations_members(channel=channel_id).get("members")
     members = list(set(members) - set(SLACK_BOT_USER_ID))
     return members
 

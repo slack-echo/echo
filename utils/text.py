@@ -19,24 +19,6 @@ def get_channels(text: str) -> list:
         return []
 
 
-def get_users(text: str) -> list:
-    """
-    get mentioned users from the text
-
-    Args:
-        text (str): the text to be parsed
-
-    Returns:
-        users (list): the list of mentioned users
-    """
-    # if the text is not empty, return the list of mentioned users id from the text (if exist)
-    # else return an empty list
-    if text and (users := re.findall(r"U[A-Z0-9]{10}", text)):
-        return users  # ['Uxxxxxxxxxx', ...]: list
-    else:
-        return []
-
-
 def get_emojis(text: str) -> list:
     """
     get emojis from the text
@@ -69,5 +51,23 @@ def get_urls(text: str) -> list:
     # else return an empty list
     if text and (urls := re.findall(r"<https?://[^\s]+>", text)):
         return urls  # ['<https://...>', ...]: list
+    else:
+        return []
+
+
+def get_users(text: str) -> list:
+    """
+    get mentioned users from the text
+
+    Args:
+        text (str): the text to be parsed
+
+    Returns:
+        users (list): the list of mentioned users
+    """
+    # if the text is not empty, return the list of mentioned users id from the text (if exist)
+    # else return an empty list
+    if text and (users := re.findall(r"U[A-Z0-9]{10}", text)):
+        return users  # ['Uxxxxxxxxxx', ...]: list
     else:
         return []
