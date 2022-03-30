@@ -1,7 +1,9 @@
 from . import commands
+from . import shortcuts
 
 
 def listen(app):
+    # commands
     app.command("/echo")(commands.echo)
     app.command("/anonymous")(commands.echo)
     app.command("/disguise")(commands.echo)
@@ -9,3 +11,6 @@ def listen(app):
     app.command("/shuffle")(commands.rand)
     app.command("/choices")(commands.rand)
     app.command("/meet")(commands.meet)
+
+    # shortcuts
+    app.shortcut("delete_message")(shortcuts.delete_message)
