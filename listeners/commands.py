@@ -32,14 +32,14 @@ def get_values(command: Dict[str, Any], values: Iterable[str]) -> Iterable[str]:
     - team_domain : {team_domain}.slack.com
     - team_id : T[A-Z0-9]{10}
     - text : {text} (if text is not empty)
-    - token : [0-9a-zA-Z]{24}
-    - trigger_id : [0-9]{13}.[0-9]{13}.[0-9a-z]{32}
-    - user_id : U[A-Z0-9]{10}
-    - user_name : {user_name}@{email_domain}
         - channels : [C|G]A-Z0-9]{10}
         - emojis : :emoji:
         - urls : <https?://[^\s]+>
         - users : U[A-Z0-9]{10}
+    - token : [0-9a-zA-Z]{24}
+    - trigger_id : [0-9]{13}.[0-9]{13}.[0-9a-z]{32}
+    - user_id : U[A-Z0-9]{10}
+    - user_name : {user_name}@{email_domain}
 
     Returns:
         (iterable): values
