@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, Iterable
 
 import slack_sdk
+import utils.models as m
 from slack_bolt import Ack
 
 
@@ -70,8 +71,60 @@ def delete_message(
     """
     logger.info(body)
 
-    channel, message = get_values(shortcut, ["channel", "message"])
+    channel, ts = get_values(shortcut, ["channel", "message_ts"])
     channel_id = channel.get("id")
-    ts = message.get("ts")
     ack()
     client.chat_delete(channel=channel_id, ts=ts)
+
+
+def edit_message(
+    body: Dict[str, Any],
+    logger: logging.Logger,
+    client: slack_sdk.web.client.WebClient,
+    shortcut: Dict[str, Any],
+    ack: Ack,
+):
+    """
+    edit message which is sent by the bot
+    """
+    logger.info(body)
+
+    channel, message, ts = get_values(shortcut, ["channel", "message", "message_ts"])
+    channel_id = channel.get("id")
+    if blocks := message.get("blocks"):
+        # TOOD: other blocks?
+        first, *_ = blocks
+        if text := first.get("text"):
+            text = text.get("text")
+    else:
+        text = message.get("text")
+
+    blocks = [
+        m.Input(
+            element=m.plain_text_input(
+                action_id="edit_message",
+                multiline=True,
+                placeholder=m.plain_text(text="메시지 편집"),
+                initial_value=text,
+                focus_on_load=True,
+            ),
+            label=m.plain_text(text="메시지 편집"),
+        ),
+        m.Actions(
+            elements=[
+                m.button(
+                    text=m.plain_text(text=":x: 취소", emoji=True),
+                    action_id="cancel_edit",
+                    style="danger",
+                ),
+                m.button(
+                    text=m.plain_text(text=":heavy_check_mark: 저장", emoji=True),
+                    action_id="save_edit",
+                    style="primary",
+                ),
+            ]
+        ),
+    ]
+
+    ack()
+    client.chat_update(channel=channel_id, ts=ts, blocks=blocks)
