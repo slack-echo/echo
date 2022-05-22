@@ -35,11 +35,12 @@ def echo_bot(request):
     return handler.handle(request)
 
 
-# if os.environ.get("ENV") == "dev":
-logging.basicConfig(level=logging.DEBUG)
+if os.environ.get("ENV") == "dev":
+    print("Development mode")
+    logging.basicConfig(level=logging.DEBUG)
 
-app = App(authorize=authorize, request_verification_enabled=False)
-app.middleware(verify)
-listeners.listen(app)
+    app = App(authorize=authorize, request_verification_enabled=False)
+    app.middleware(verify)
+    listeners.listen(app)
 
-app.start(port=int(os.environ.get("PORT", 3000)))
+    app.start(port=int(os.environ.get("PORT", 3000)))
