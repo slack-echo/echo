@@ -1,7 +1,10 @@
 SLACK_BOT_USER_ID: 
-  - U02EE3TDD5J # Echo
+  - U02EE3TDD5J # Echo @ SKKU GBME
+  - U035WL7KDHA # Echo @ Cocoan lab
+  - U03ADT2MAJK # Echo @ Echo Devs
   - U0259K4B8F4 # Echo_test
-  - U01P7TZHC1M # Simple Poll
+  - U01P7TZHC1M # Simple Poll @ SKKU GBME
+  - U01RZLSCUBC # Simple Poll @ Cocoan lab
 help:
   echo: |-
     :x: 실행되지 않았습니다.
