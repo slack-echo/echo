@@ -10,7 +10,7 @@ from utils.loader import read_yaml
 
 
 def authorize(enterprise_id: str, team_id: str, logger: Logger) -> AuthorizeResult:
-    secrets = read_yaml("secrets/SECRETS")
+    secrets = read_yaml("/secrets/SECRETS")
     installations = secrets.get("INSTALLATIONS")
     for team in installations:
         # enterprise_id doesn't exist for some teams
@@ -35,7 +35,7 @@ def authorize(enterprise_id: str, team_id: str, logger: Logger) -> AuthorizeResu
 def verify(req: BoltRequest, resp: BoltResponse, next: Callable[[], BoltResponse], logger: Optional[Logger] = None) -> BoltResponse:  # type: ignore
     enterprise_id = req.context.enterprise_id
     team_id = req.context.team_id
-    secrets = read_yaml("secrets/SECRETS")
+    secrets = read_yaml("/secrets/SECRETS")
     installations = secrets.get("INSTALLATIONS")
     for team in installations:
         # enterprise_id doesn't exist for some teams
