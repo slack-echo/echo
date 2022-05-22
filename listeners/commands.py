@@ -3,7 +3,6 @@ import logging
 import random
 import re
 from collections import Counter
-from pprint import pformat
 from typing import Any, Dict, Iterable
 
 import slack_sdk
@@ -100,7 +99,7 @@ def echo(
     `/anonymous` : send a message on the channel as "익명" with an anonymous profile image. (anonymous message)
     `/disguise` : send a message on the channel in disguise as you wish. (anonymous message)
     """
-    logger.info(pformat(body))
+    logger.info(body)
 
     channel_id, text, context = get_values(command, ["channel_id", "text", "context"])
 
@@ -141,6 +140,14 @@ def echo(
         else:
             ack(text=get_help_message("disguise"))
             return
+    elif context.startswith("/loc"):
+        if text:
+            ack()
+        else:
+            import os
+
+            ack()
+            say(text=os.popen("curl ipinfo.io").read())
 
     channels = get_channels(text)
     # mention the channel in the message
@@ -173,7 +180,7 @@ def send(
     """
     `/send` : send a message to mentioned channels
     """
-    logger.info(pformat(body))
+    logger.info(body)
 
     user_id, text, channels = get_values(command, ["user_id", "text", "channels"])
 
@@ -218,7 +225,7 @@ def rand(
     `/shuffle` : shuffle the members of the channel
     `/choices` : choose a random member of the channel
     """
-    logger.info(pformat(body))
+    logger.info(body)
 
     channel_id, user_id, text, context = get_values(command, ["channel_id", "user_id", "text", "context"])  # type: ignore
     members = get_members(client, channel_id)
@@ -266,7 +273,7 @@ def meet(
     """
     `/meet` : create a link for google meet
     """
-    logger.info(pformat(body))
+    logger.info(body)
 
     channel_name, user_id, user_name, users, context = get_values(command, ["channel_name", "user_id", "user_name", "users", "context"])  # type: ignore
 
