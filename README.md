@@ -27,7 +27,7 @@ ssh -R 80:localhost:3000 localhost.run
 ### Set Environment Variables
 
 ```bash
-export `sed -e 's/[[:space:]]*:[[:space:]]*/=/g' .env.yaml;echo;echo ENV=dev`
+export `sed -e 's/[[:space:]]*:[[:space:]]*/=/g' .env.yaml`
 ```
 
 ### Run [main.py](main.py)
