@@ -1,5 +1,6 @@
 from . import commands
 from . import shortcuts
+from . import actions
 
 
 def listen(app):
@@ -15,3 +16,6 @@ def listen(app):
 
     # shortcuts
     app.shortcut("delete_message")(shortcuts.delete_message)
+
+    # actions
+    app.action("join_meet")(actions.join_meet)

@@ -309,7 +309,15 @@ def meet(
         + "&flowEntry=AccountChooser"
     )
     blocks = [
-        m.Section(text=m.mrkdwn(text=f"> *<{link}|Google Meet 참여하기>*")),
+        m.Actions(
+            elements=[
+                m.button(
+                    text=m.plain_text(text="Google Meet 참여하기"),
+                    url=link,
+                    action_id="join_meet",
+                )
+            ]
+        ),
         m.Divider(),
         m.Context(elements=[m.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]),
     ]
