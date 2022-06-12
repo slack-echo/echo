@@ -1,5 +1,11 @@
 from . import commands
 from . import shortcuts
+from . import actions
+
+
+def is_echo(shortcut):
+    event_type = shortcut.get("message", {}).get("metadata", {}).get("event_type", "")
+    return event_type == "echo"
 
 
 def listen(app):
@@ -14,4 +20,9 @@ def listen(app):
     app.command("/meet")(commands.meet)
 
     # shortcuts
-    app.shortcut("delete_message")(shortcuts.delete_message)
+    app.shortcut("delete_message", [is_echo])(shortcuts.delete_message)
+    app.shortcut("edit_message", [is_echo])(shortcuts.edit_message)
+
+    # actions
+    app.action("save_edit")(actions.save_edit)
+    app.action("cancel_edit")(actions.cancel_edit)
