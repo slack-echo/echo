@@ -52,3 +52,6 @@ from slack_sdk.models.blocks import SectionBlock as Section  # noqa
 
 # attachments
 from slack_sdk.models.attachments import BlockAttachment as attachments  # noqa
+
+# metadata
+from slack_sdk.models.metadata import Metadata as metadata  # noqa

@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable
 
 import slack_sdk
 from slack_bolt import Ack, Say
-from utils import blocks
+import utils.models as m
 from utils.loader import read_yaml
 from utils.text import get_channels, get_emojis, get_urls, get_users
 
@@ -155,9 +155,9 @@ def echo(
         try:
             say(
                 text=f"이 채널이 <#{channel_id}>에서 멘션되었습니다.",
-                attachments=blocks.attachments(
+                attachments=m.attachments(
                     color="#d0d0d0",
-                    blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
+                    blocks=[m.Section(text=m.mrkdwn(text=text))],
                 ).to_dict(),
                 channel=channel,
             )
@@ -198,9 +198,9 @@ def send(
         try:
             say(
                 text=f"<@{user_id}>님이 보낸 메시지 입니다.",
-                attachments=blocks.attachments(
+                attachments=m.attachments(
                     color="#d0d0d0",
-                    blocks=[blocks.Section(text=blocks.mrkdwn(text=text))],
+                    blocks=[m.Section(text=m.mrkdwn(text=text))],
                 ).to_dict(),
                 channel=channel,
             )
@@ -254,10 +254,10 @@ def rand(
     ack()
     say(
         blocks=[
-            blocks.Section(text=blocks.mrkdwn(text="".join(members))),
-            blocks.Divider(),
-            blocks.Context(
-                elements=[blocks.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
+            m.Section(text=m.mrkdwn(text="".join(members))),
+            m.Divider(),
+            m.Context(
+                elements=[m.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
             ),
         ]
     )
@@ -291,17 +291,15 @@ def meet(
         + "&flowName=GlifWebSignIn"
         + "&flowEntry=AccountChooser"
     )
-    block = [
-        blocks.Section(text=blocks.mrkdwn(text=f"> *<{link}|Google Meet 참여하기>*")),
-        blocks.Divider(),
-        blocks.Context(
-            elements=[blocks.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
-        ),
+    blocks = [
+        m.Section(text=m.mrkdwn(text=f"> *<{link}|Google Meet 참여하기>*")),
+        m.Divider(),
+        m.Context(elements=[m.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]),
     ]
 
     # send the message
     ack()
     for user in users:
-        say(username="Google Meet", icon_emoji=":meet:", blocks=block, channel=user)
+        say(username="Google Meet", icon_emoji=":meet:", blocks=blocks, channel=user)
     else:
-        say(username="Google Meet", icon_emoji=":meet:", blocks=block)
+        say(username="Google Meet", icon_emoji=":meet:", blocks=blocks)
