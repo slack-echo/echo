@@ -26,8 +26,10 @@ ssh -R 80:localhost:3000 localhost.run
 
 ### Set Environment Variables
 
+On single workspace
+
 ```bash
-export `sed -e 's/[[:space:]]*:[[:space:]]*/=/g' secrets/.env.yaml`
+export `sed -e 's/[[:space:]]*:[[:space:]]*/=/g' auth/.env.yaml`
 ```
 
 ### Run [main.py](main.py)
@@ -44,25 +46,25 @@ tree --dirsfirst -vFI "$(grep -hvE '^$|^#' {,$(git rev-parse --show-toplevel)/}.
 
 ```bash
 echo/
+├── auth/
+│   ├── .env.yaml.sample
+│   ├── SECRETS.sample -> .env.yaml.sample
+│   └── __init__.py
 ├── listeners/
 │   ├── __init__.py
 │   ├── commands.py
 │   └── shortcuts.py
-├── secrets/
-│   ├── .env.yaml.sample
-│   └── SECRETS -> .env.yaml
 ├── utils/
 │   ├── blocks.py
 │   ├── loader.py
 │   └── text.py
 ├── LICENSE
 ├── README.md
-├── authorize.py
 ├── config.yaml
 ├── main.py
 └── requirements.txt
 
-3 directories, 14 files
+3 directories, 13 files
 
 ```
 
