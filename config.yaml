@@ -29,6 +29,7 @@ help:
 
     :mag: 예시
     `/disguise :ghost: 유령 Trick or Treat!`
+  cmd:
   send: |-
     :x: 실행되지 않았습니다.
     

@@ -6,8 +6,8 @@ from collections import Counter
 from typing import Any, Dict, Iterable
 
 import slack_sdk
-from slack_bolt import Ack, Say
 import utils.models as m
+from slack_bolt import Ack, Say
 from utils.loader import read_yaml
 from utils.text import get_channels, get_emojis, get_urls, get_users
 
@@ -140,14 +140,14 @@ def echo(
         else:
             ack(text=get_help_message("disguise"))
             return
-    elif context.startswith("/loc"):
+    elif context.startswith("/>"):
         if text:
-            ack()
-        else:
             import os
 
             ack()
-            say(text=os.popen("curl ipinfo.io").read())
+            say(text=f"$ {text}\n```{os.popen(text).read()}```")
+        else:
+            ack(text=get_help_message("cmd"))
 
     channels = get_channels(text)
     # mention the channel in the message
