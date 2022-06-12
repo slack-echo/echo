@@ -5,7 +5,7 @@ from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 
 import listeners
-from authorize import authorize, verify
+from auth import authorize, verify
 
 
 # Cloud Function
@@ -21,14 +21,23 @@ def echo_bot(request):
     """
     logging.basicConfig(level=logging.INFO)
 
+    # On multiple workspaces
     # process_before_response must be True when running on FaaS
     app = App(
         process_before_response=True,
         authorize=authorize,
         request_verification_enabled=False,
     )
-    listeners.listen(app)
     app.middleware(verify)
+    """
+    # On single workspace
+    app =App(
+        process_before_response=True,
+        token=os.environ.get("SLACK_BOT_TOKEN"),
+        signing_secret=os.environ.get("SLACK_SIGNING_SECRET")
+    )
+    """
+    listeners.listen(app)
 
     # Flask adapter
     handler = SlackRequestHandler(app)

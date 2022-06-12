@@ -5,12 +5,13 @@ from slack_bolt.authorization import AuthorizeResult
 from slack_bolt.middleware import RequestVerification
 from slack_bolt.request import BoltRequest
 from slack_bolt.response import BoltResponse
-
 from utils.loader import read_yaml
+
+SECRET_PATH = "/secrets/SECRETS"
 
 
 def authorize(enterprise_id: str, team_id: str, logger: Logger) -> AuthorizeResult:
-    secrets = read_yaml("/secrets/SECRETS")
+    secrets = read_yaml(SECRET_PATH)
     installations = secrets.get("INSTALLATIONS")
     for team in installations:
         # enterprise_id doesn't exist for some teams
@@ -35,7 +36,7 @@ def authorize(enterprise_id: str, team_id: str, logger: Logger) -> AuthorizeResu
 def verify(req: BoltRequest, resp: BoltResponse, next: Callable[[], BoltResponse], logger: Optional[Logger] = None) -> BoltResponse:  # type: ignore
     enterprise_id = req.context.enterprise_id
     team_id = req.context.team_id
-    secrets = read_yaml("/secrets/SECRETS")
+    secrets = read_yaml(SECRET_PATH)
     installations = secrets.get("INSTALLATIONS")
     for team in installations:
         # enterprise_id doesn't exist for some teams
