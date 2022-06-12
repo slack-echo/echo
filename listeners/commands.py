@@ -102,20 +102,26 @@ def echo(
     logger.info(body)
 
     channel_id, text, context = get_values(command, ["channel_id", "text", "context"])
+    metadata = m.metadata(event_type="echo", event_payload={"context": context, "text": text})  # type: ignore
 
     # if the message is valid, send the message to the channel
     # else the message is invalid, send help message
     if context.startswith("/echo"):
         if text:
             ack()
-            say(text=text)
+            say(text=text, metadata=metadata)
         else:
             ack(text=get_help_message("echo"))
             return
     elif context.startswith("/anonymous"):
         if text:
             ack()
-            say(text=text, username="익명", icon_emoji=":bust_in_silhouette:")
+            say(
+                text=text,
+                username="익명",
+                icon_emoji=":bust_in_silhouette:",
+                metadata=metadata,
+            )
         else:
             ack(text=get_help_message("anonymous"))
             return
@@ -134,9 +140,14 @@ def echo(
             username, *_ = text.split()
             text = re.sub(username + "\s+", "", text, 1)
 
-            kwagrs = {"username": username, "icon_emoji": emoji, "icon_url": url}
             ack()
-            say(text=text, **kwagrs)
+            say(
+                text=text,
+                username=username,
+                icon_emoji=emoji,
+                icon_url=url,
+                metadata=metadata,
+            )
         else:
             ack(text=get_help_message("disguise"))
             return
@@ -145,7 +156,7 @@ def echo(
             import os
 
             ack()
-            say(text=f"$ {text}\n```{os.popen(text).read()}```")
+            say(text=f"$ {text}\n```{os.popen(text).read()}```", metadata=metadata)
         else:
             ack(text=get_help_message("cmd"))
 
@@ -160,6 +171,7 @@ def echo(
                     blocks=[m.Section(text=m.mrkdwn(text=text))],
                 ).to_dict(),
                 channel=channel,
+                metadata=metadata,
             )
         except slack_sdk.errors.SlackApiError as e:
             error = e.response["error"]
@@ -183,6 +195,7 @@ def send(
     logger.info(body)
 
     user_id, text, channels = get_values(command, ["user_id", "text", "channels"])
+    metadata = m.metadata(event_type="send", event_payload={"text": text})
 
     # TODO:
     # [-] preview message
@@ -203,6 +216,7 @@ def send(
                     blocks=[m.Section(text=m.mrkdwn(text=text))],
                 ).to_dict(),
                 channel=channel,
+                metadata=metadata,
             )
         except slack_sdk.errors.SlackApiError as e:
             error = e.response["error"]
@@ -229,6 +243,7 @@ def rand(
 
     channel_id, user_id, text, context = get_values(command, ["channel_id", "user_id", "text", "context"])  # type: ignore
     members = get_members(client, channel_id)
+    metadata = m.metadata(event_type="rand", event_payload={"context": context, "text": text})  # type: ignore
 
     random.seed()
 
@@ -259,7 +274,8 @@ def rand(
             m.Context(
                 elements=[m.mrkdwn(text=f"<@{user_id}>님이 `{context}`를 실행하였습니다.")]
             ),
-        ]
+        ],
+        metadata=metadata,
     )
 
 
@@ -276,6 +292,7 @@ def meet(
     logger.info(body)
 
     channel_name, user_id, user_name, users, context = get_values(command, ["channel_name", "user_id", "user_name", "users", "context"])  # type: ignore
+    metadata = m.metadata(event_type="meet", event_payload={"context": context})
 
     # get the meeting link
     if users:
@@ -300,6 +317,17 @@ def meet(
     # send the message
     ack()
     for user in users:
-        say(username="Google Meet", icon_emoji=":meet:", blocks=blocks, channel=user)
+        say(
+            username="Google Meet",
+            icon_emoji=":meet:",
+            blocks=blocks,
+            channel=user,
+            metadata=metadata,
+        )
     else:
-        say(username="Google Meet", icon_emoji=":meet:", blocks=blocks)
+        say(
+            username="Google Meet",
+            icon_emoji=":meet:",
+            blocks=blocks,
+            metadata=metadata,
+        )
