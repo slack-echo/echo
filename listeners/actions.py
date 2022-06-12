@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, Iterable
 
 import slack_sdk
+import utils.models as m
 from slack_bolt import Ack
 
 
@@ -89,6 +90,68 @@ def get_values(body: Dict[str, Any], values: Iterable[Any]) -> Any:
         (iterable): values
     """
     return (body.get(k, "") for k in values)
+
+
+def cancel_edit(
+    body: Dict[str, Any],
+    logger: logging.Logger,
+    client: slack_sdk.web.client.WebClient,
+    ack: Ack,
+):
+    """
+    cancel editing message which is sent by the bot
+    """
+    logger.info(body)
+
+    channel, message = get_values(body, ["channel", "message"])
+    channel_id = channel.get("id")
+    message_ts = message.get("ts")
+    metadata = message["metadata"]
+    text = metadata["event_payload"].get("text")
+
+    ack()
+    client.chat_update(
+        channel=channel_id,
+        ts=message_ts,
+        blocks=[m.Section(text=m.mrkdwn(text=text))],
+        metadata=metadata,
+    )
+
+
+def save_edit(
+    body: Dict[str, Any],
+    logger: logging.Logger,
+    client: slack_sdk.web.client.WebClient,
+    ack: Ack,
+):
+    """
+    save editing message which is sent by the bot
+    """
+    logger.info(body)
+
+    channel, message, state = get_values(body, ["channel", "message", "state"])
+    channel_id = channel.get("id")
+    message_ts = message.get("ts")
+    metadata = message["metadata"]
+
+    if state_values := state.get("values"):
+        _, input_block = state_values.popitem()
+        _, input = input_block.popitem()
+        text = input.get("value")
+        metadata["event_payload"].update(text=text)
+    else:
+        text = metadata["event_payload"].get("text")
+
+    ack()
+    if text:
+        client.chat_update(
+            channel=channel_id,
+            ts=message_ts,
+            blocks=[m.Section(text=m.mrkdwn(text=text))],
+            metadata=metadata,
+        )
+    else:
+        client.chat_delete(channel=channel_id, ts=message_ts)
 
 
 def join_meet(

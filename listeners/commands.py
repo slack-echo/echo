@@ -140,6 +140,7 @@ def echo(
             username, *_ = text.split()
             text = re.sub(username + "\s+", "", text, 1)
 
+            metadata.event_payload.update(text=text)
             ack()
             say(
                 text=text,
@@ -155,8 +156,10 @@ def echo(
         if text:
             import os
 
+            text = f"$ {text}\n```{os.popen(text).read()}```"
+            metadata.event_payload.update(text=text)
             ack()
-            say(text=f"$ {text}\n```{os.popen(text).read()}```", metadata=metadata)
+            say(text=text, metadata=metadata)
         else:
             ack(text=get_help_message("cmd"))
 
