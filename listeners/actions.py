@@ -106,15 +106,15 @@ def cancel_edit(
     channel, message = get_values(body, ["channel", "message"])
     channel_id = channel.get("id")
     message_ts = message.get("ts")
-
-    input_block, *_ = message.get("blocks")
-    text = input_block["element"]["initial_value"]
+    metadata = message["metadata"]
+    text = metadata["event_payload"].get("text")
 
     ack()
     client.chat_update(
         channel=channel_id,
         ts=message_ts,
         blocks=[m.Section(text=m.mrkdwn(text=text))],
+        metadata=metadata,
     )
 
 
@@ -132,14 +132,15 @@ def save_edit(
     channel, message, state = get_values(body, ["channel", "message", "state"])
     channel_id = channel.get("id")
     message_ts = message.get("ts")
+    metadata = message["metadata"]
 
     if state_values := state.get("values"):
         _, input_block = state_values.popitem()
-        _, block = input_block.popitem()
-        text = block.get("value")
+        _, input = input_block.popitem()
+        text = input.get("value")
+        metadata["event_payload"].update(text=text)
     else:
-        input_block, *_ = message.get("blocks")
-        text = input_block["element"]["initial_value"]
+        text = metadata["event_payload"].get("text")
 
     ack()
     if text:
@@ -147,6 +148,7 @@ def save_edit(
             channel=channel_id,
             ts=message_ts,
             blocks=[m.Section(text=m.mrkdwn(text=text))],
+            metadata=metadata,
         )
     else:
         client.chat_delete(channel=channel_id, ts=message_ts)

@@ -91,13 +91,8 @@ def edit_message(
 
     channel, message, ts = get_values(shortcut, ["channel", "message", "message_ts"])
     channel_id = channel.get("id")
-    if blocks := message.get("blocks"):
-        # TOOD: other blocks?
-        first, *_ = blocks
-        if text := first.get("text"):
-            text = text.get("text")
-    else:
-        text = message.get("text")
+    metadata = message["metadata"]
+    text = metadata["event_payload"].get("text")
 
     blocks = [
         m.Input(
@@ -127,4 +122,4 @@ def edit_message(
     ]
 
     ack()
-    client.chat_update(channel=channel_id, ts=ts, blocks=blocks)
+    client.chat_update(channel=channel_id, ts=ts, blocks=blocks, metadata=metadata)
