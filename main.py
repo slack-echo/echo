@@ -4,8 +4,8 @@ import os
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
 
+import auth
 import listeners
-from auth import authorize, verify
 
 
 # Cloud Function
@@ -25,10 +25,10 @@ def echo_bot(request):
     # process_before_response must be True when running on FaaS
     app = App(
         process_before_response=True,
-        authorize=authorize,
+        authorize=auth.authorize,
         request_verification_enabled=False,
     )
-    app.middleware(verify)
+    app.middleware(auth.verify)
     """
     # On single workspace
     app =App(
@@ -47,9 +47,11 @@ def echo_bot(request):
 if os.environ.get("ENV") == "dev":
     print("Development mode")
     logging.basicConfig(level=logging.DEBUG)
+    auth.SECRET_PATH = "auth/.env.yaml"
+    listeners.commands.YAML_FILE = "config.yaml"
 
-    app = App(authorize=authorize, request_verification_enabled=False)
-    app.middleware(verify)
+    app = App(authorize=auth.authorize, request_verification_enabled=False)
+    app.middleware(auth.verify)
     listeners.listen(app)
 
     app.start(port=int(os.environ.get("PORT", 3000)))
