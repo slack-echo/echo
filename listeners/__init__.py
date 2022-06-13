@@ -28,6 +28,7 @@ def listen(app):
     app.action("cancel_edit")(actions.cancel_edit)
     app.action("join_meet")(actions.join_meet)
     app.action("add_option")(actions.add_option)
+    app.action("vote")(actions.vote)
 
     # views
     app.view("poll")(views.poll)
