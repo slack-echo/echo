@@ -1,5 +1,5 @@
 from . import actions, commands
-from .shortcuts import message_shortcut
+from .shortcuts import global_shortcut, message_shortcut
 
 
 def is_echo(shortcut):
@@ -21,6 +21,7 @@ def listen(app):
     # shortcuts
     app.shortcut("delete_message", [is_echo])(message_shortcut.delete_message)
     app.shortcut("edit_message", [is_echo])(message_shortcut.edit_message)
+    app.shortcut("poll")(global_shortcut.poll)
 
     # actions
     app.action("save_edit")(actions.save_edit)
