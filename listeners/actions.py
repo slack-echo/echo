@@ -85,6 +85,26 @@ def get_values(body: Dict[str, Any], values: Iterable[Any]) -> Any:
         - name (str): {user_name}@{email_domain}
         - team_id (str): T[A-Z0-9]{10}
         - username (str): {user_name}
+    - view (dict):
+        - app_id : A[A-Z0-9]{10}
+        - app_installed_team_id (str): T[A-Z0-9]{10}
+        - blocks (list : dict)
+        - bot_id (str): B[A-Z0-9]{10}
+        - callback_id (str): {callback_id}
+        - clear_on_close (bool): False
+        - close (dict): {block}
+        - external_id (str): ''
+        - hash (str): [0-9]{10}.[a-zA-Z]{8}
+        - id (str): V[A-Z0-9]{10}
+        - notify_on_close (bool): False
+        - previous_view_id (str): V[A-Z0-9]{10}|None
+        - private_metadata (str)
+        - root_view_id (str): V[A-Z0-9]{10}
+        - state (dict): {state}
+        - submit (dict): {block}
+        - team_id (str): T[A-Z0-9]{10}
+        - title (dict): {block}
+        - type (str): modal
 
     Returns:
         (iterable): values
@@ -158,3 +178,56 @@ def join_meet(
     """
     logger.info(body)
     ack()
+
+
+def add_option(
+    body: Dict[str, Any],
+    logger: logging.Logger,
+    client: slack_sdk.web.client.WebClient,
+    action: Dict[str, Any],
+    ack: Ack,
+):
+    """
+    add poll option
+    """
+    logger.info(body)
+
+    index, value = map(int, action.get("value").split("."))
+    option = m.Input(
+        block_id=f"option_{value}",
+        label=m.plain_text(text=f"항목 {value}"),
+        element=m.plain_text_input(action_id="input"),
+        optional=True,
+    )
+    limit_option = m.option(text=m.plain_text(text=f"{value-1}표"), value=str(value - 1))
+
+    view = body["view"]
+    blocks = view["blocks"]
+    blocks[index] = m.Actions(
+        block_id="add_option",
+        elements=[
+            m.button(
+                text=m.plain_text(text=":heavy_plus_sign: 항목 추가"),
+                action_id="add_option",
+                value=f"{index+1}.{value+1}",
+            )
+        ],
+    )
+    blocks.insert(index, option)
+    blocks[-1]["element"]["options"].append(limit_option)
+
+    view_id = view.get("id")
+    hash = view.get("hash")
+    ack()
+    client.views_update(
+        view=m.View(
+            type=view["type"],
+            callback_id=view["callback_id"],
+            title=view["title"],
+            submit=view["submit"],
+            close=view["close"],
+            blocks=blocks,
+        ),
+        view_id=view_id,
+        hash=hash,
+    )

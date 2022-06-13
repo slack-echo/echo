@@ -27,3 +27,4 @@ def listen(app):
     app.action("save_edit")(actions.save_edit)
     app.action("cancel_edit")(actions.cancel_edit)
     app.action("join_meet")(actions.join_meet)
+    app.action("add_option")(actions.add_option)

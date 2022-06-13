@@ -60,6 +60,7 @@ def poll(
                 m.button(
                     text=m.plain_text(text=":heavy_plus_sign: 항목 추가"),
                     action_id="add_option",
+                    value="6.4",  # index and value of option_4
                 )
             ],
         ),
