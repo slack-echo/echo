@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterable
 
 import slack_sdk
 import utils.models as m
-from slack_bolt import Ack
+from slack_bolt import Ack, Respond
 
 
 def get_values(shortcut: Dict[str, Any], values: Iterable[Any]) -> Any:
@@ -62,19 +62,16 @@ def get_values(shortcut: Dict[str, Any], values: Iterable[Any]) -> Any:
 def delete_message(
     body: Dict[str, Any],
     logger: logging.Logger,
-    client: slack_sdk.web.client.WebClient,
-    shortcut: Dict[str, Any],
     ack: Ack,
+    respond: Respond,
 ):
     """
     delete message which is sent by the bot
     """
     logger.info(body)
 
-    channel, ts = get_values(shortcut, ["channel", "message_ts"])
-    channel_id = channel.get("id")
     ack()
-    client.chat_delete(channel=channel_id, ts=ts)
+    respond(delete_original=True)
 
 
 def edit_message(
@@ -96,8 +93,9 @@ def edit_message(
 
     blocks = [
         m.Input(
+            block_id="edit_message",
             element=m.plain_text_input(
-                action_id="edit_message",
+                action_id="input",
                 multiline=True,
                 placeholder=m.plain_text(text="메시지 편집"),
                 initial_value=text,

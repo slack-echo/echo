@@ -51,7 +51,7 @@ from slack_sdk.models.blocks import InputBlock as Input  # noqa
 from slack_sdk.models.blocks import SectionBlock as Section  # noqa
 
 # attachments
-from slack_sdk.models.attachments import BlockAttachment as attachments  # noqa
+from slack_sdk.models.attachments import BlockAttachment as block_attachment  # noqa
 
 # views
 from slack_sdk.models.views import View  # noqa

@@ -169,10 +169,11 @@ def echo(
         try:
             say(
                 text=f"이 채널이 <#{channel_id}>에서 멘션되었습니다.",
-                attachments=m.attachments(
-                    color="#d0d0d0",
-                    blocks=[m.Section(text=m.mrkdwn(text=text))],
-                ).to_dict(),
+                attachments=[
+                    m.block_attachment(
+                        color="#d0d0d0", blocks=[m.Section(text=m.mrkdwn(text=text))]
+                    )
+                ],
                 channel=channel,
                 metadata=metadata,
             )
@@ -214,10 +215,11 @@ def send(
         try:
             say(
                 text=f"<@{user_id}>님이 보낸 메시지 입니다.",
-                attachments=m.attachments(
-                    color="#d0d0d0",
-                    blocks=[m.Section(text=m.mrkdwn(text=text))],
-                ).to_dict(),
+                attachments=[
+                    m.block_attachment(
+                        color="#d0d0d0", blocks=[m.Section(text=m.mrkdwn(text=text))]
+                    )
+                ],
                 channel=channel,
                 metadata=metadata,
             )

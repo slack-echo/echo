@@ -3,7 +3,7 @@ from typing import Any, Dict, Iterable
 
 import slack_sdk
 import utils.models as m
-from slack_bolt import Ack
+from slack_bolt import Ack, Respond
 
 
 def get_values(body: Dict[str, Any], values: Iterable[Any]) -> Any:
@@ -18,7 +18,7 @@ def get_values(body: Dict[str, Any], values: Iterable[Any]) -> Any:
     - actions (list : dict):
         - action_id (str): {action_id}
         - action_ts (str): [0-9]{10}.[0-9]{6}
-        - block_id (str): [0-9a-zA-Z]{5}
+        - block_id (str): {block_id}
         - type (str : data):
             - button : text (dict), value (str), style (str)
             - overflow : selected_option (dict)
@@ -95,27 +95,19 @@ def get_values(body: Dict[str, Any], values: Iterable[Any]) -> Any:
 def cancel_edit(
     body: Dict[str, Any],
     logger: logging.Logger,
-    client: slack_sdk.web.client.WebClient,
     ack: Ack,
+    respond: Respond,
 ):
     """
     cancel editing message which is sent by the bot
     """
     logger.info(body)
 
-    channel, message = get_values(body, ["channel", "message"])
-    channel_id = channel.get("id")
-    message_ts = message.get("ts")
-    metadata = message["metadata"]
+    metadata = body["message"]["metadata"]
     text = metadata["event_payload"].get("text")
 
     ack()
-    client.chat_update(
-        channel=channel_id,
-        ts=message_ts,
-        blocks=[m.Section(text=m.mrkdwn(text=text))],
-        metadata=metadata,
-    )
+    respond(blocks=[m.Section(text=m.mrkdwn(text=text))])
 
 
 def save_edit(
@@ -123,6 +115,7 @@ def save_edit(
     logger: logging.Logger,
     client: slack_sdk.web.client.WebClient,
     ack: Ack,
+    respond: Respond,
 ):
     """
     save editing message which is sent by the bot
@@ -135,9 +128,9 @@ def save_edit(
     metadata = message["metadata"]
 
     if state_values := state.get("values"):
-        _, input_block = state_values.popitem()
-        _, input = input_block.popitem()
-        text = input.get("value")
+        _, block = state_values.popitem()  # block_id, block: {action_id, block_element}
+        _, state_value = block.popitem()  # action_id, state_value
+        text = state_value.get("value")
         metadata["event_payload"].update(text=text)
     else:
         text = metadata["event_payload"].get("text")
@@ -151,7 +144,7 @@ def save_edit(
             metadata=metadata,
         )
     else:
-        client.chat_delete(channel=channel_id, ts=message_ts)
+        respond(delete_original=True)
 
 
 def join_meet(
