@@ -1,6 +1,5 @@
-from . import commands
-from . import shortcuts
-from . import actions
+from . import actions, commands
+from .shortcuts import message_shortcut
 
 
 def is_echo(shortcut):
@@ -20,8 +19,8 @@ def listen(app):
     app.command("/meet")(commands.meet)
 
     # shortcuts
-    app.shortcut("delete_message", [is_echo])(shortcuts.delete_message)
-    app.shortcut("edit_message", [is_echo])(shortcuts.edit_message)
+    app.shortcut("delete_message", [is_echo])(message_shortcut.delete_message)
+    app.shortcut("edit_message", [is_echo])(message_shortcut.edit_message)
 
     # actions
     app.action("save_edit")(actions.save_edit)
