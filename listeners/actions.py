@@ -231,3 +231,35 @@ def add_option(
         view_id=view_id,
         hash=hash,
     )
+
+
+def vote(
+    body: Dict[str, Any],
+    logger: logging.Logger,
+    action: Dict[str, Any],
+    ack: Ack,
+    respond: Respond,
+):
+    """
+    vote selected option for poll
+    """
+    logger.info(body)
+
+    message, user = get_values(body, ["message", "user"])
+    blocks = message.get("blocks")
+    user_id = user.get("id")
+    block_id = action.get("block_id")
+
+    for block in blocks:
+        if block["block_id"] == block_id:
+            break
+    state_value = block.get("text", {})
+    text = state_value.get("text")
+
+    if user_id in text:
+        state_value.update(text=text.replace(f"<@{user_id}> ", ""))
+    else:
+        state_value.update(text=text + f"<@{user_id}> ")
+
+    ack()
+    respond(blocks=blocks)

@@ -48,7 +48,7 @@ def poll(
         *(
             m.Section(
                 block_id=block_id,
-                text=m.mrkdwn(text=f"{i+1}. {option}"),
+                text=m.mrkdwn(text=f"{i+1}. {option}\n"),
                 accessory=m.button(
                     action_id="vote",
                     text=m.plain_text(text=f"{i+1}"),
