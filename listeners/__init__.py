@@ -31,4 +31,5 @@ def listen(app):
     app.action("vote")(actions.vote)
 
     # views
-    app.view("poll")(views.poll)
+    app.view("preview_poll")(views.preview_poll)
+    app.view("create_poll")(views.create_poll)

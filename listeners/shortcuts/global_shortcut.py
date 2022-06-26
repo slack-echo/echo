@@ -73,11 +73,11 @@ def poll(
                 options=[
                     m.option(
                         text=m.mrkdwn(text=":bust_in_silhouette: *익명으로 투표*"),
-                        value="anonymous",
+                        value="1",
                     ),
                     m.option(
                         text=m.mrkdwn(text=":heavy_plus_sign: *항목 추가 허용*"),
-                        value="allow_add_option",
+                        value="2",
                     ),
                 ],
             ),
@@ -101,7 +101,7 @@ def poll(
         trigger_id=body["trigger_id"],
         view=m.View(
             type="modal",
-            callback_id="poll",
+            callback_id="preview_poll",
             title=m.plain_text(text="투표 올리기"),
             submit=m.plain_text(text="미리보기"),
             close=m.plain_text(text="취소"),
